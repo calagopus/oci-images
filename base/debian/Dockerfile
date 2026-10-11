@@ -19,9 +19,11 @@ RUN         apt-get update \
                 libfreetype6 \
                 libgif7 \
                 libjpeg62-turbo \
+                libncursesw6 \
                 libstdc++6 \
                 locales \
                 lsof \
+                netbase \
                 openssl \
                 sqlite3 \
                 tar \
