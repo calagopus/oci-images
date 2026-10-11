@@ -1,0 +1,263 @@
+name: build
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 17 1,15 * *"
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/build.yml
+      - base/**
+      - installers/**
+      - java/**
+      - nodejs/**
+  pull_request:
+    paths:
+      - .github/workflows/build.yml
+      - base/**
+      - installers/**
+      - java/**
+      - nodejs/**
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/calagopus/oci-images
+  PLATFORMS: linux/amd64,linux/arm64
+
+jobs:
+  base:
+    name: "base_${{ matrix.base }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        base:
+          - alpine
+          - debian
+    env:
+      TAG: base_${{ matrix.base }}
+    steps:
+      - name: Git checkout for Github repository workspace
+        uses: actions/checkout@v7
+
+      - name: Setup QEMU for multiarch builds
+        uses: docker/setup-qemu-action@v4
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image for testing
+        uses: docker/build-push-action@v7
+        with:
+          context: ./base
+          file: ./base/${{ matrix.base }}/Dockerfile
+          load: true
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+
+      - name: Test image
+        run: docker run --rm -e STARTUP="id" "$IMAGE:$TAG"
+
+      - name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./base
+          file: ./base/${{ matrix.base }}/Dockerfile
+          platforms: ${{ env.PLATFORMS }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+
+  installers:
+    name: "installers_${{ matrix.installer }}"
+    needs: base
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        installer:
+          - alpine
+          - debian
+    env:
+      TAG: installers_${{ matrix.installer }}
+    steps:
+      - name: Git checkout for Github repository workspace
+        uses: actions/checkout@v7
+
+      - name: Setup QEMU for multiarch builds
+        uses: docker/setup-qemu-action@v4
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image for testing
+        uses: docker/build-push-action@v7
+        with:
+          context: ./installers/${{ matrix.installer }}
+          load: true
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE }}:base_${{ matrix.installer }}
+
+      - name: Test image
+        run: docker run --rm "$IMAGE:$TAG" sh -c 'test "$(id -u)" = 0 && jq --version'
+
+      - name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./installers/${{ matrix.installer }}
+          platforms: ${{ env.PLATFORMS }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE }}:base_${{ matrix.installer }}
+
+  java:
+    name: "java${{ matrix.version }}_${{ matrix.vendor }}"
+    needs: base
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        vendor:
+          - corretto
+          - graalvm-ce
+          - graalvm-ee
+          - shenandoah
+          - temurin
+          - zulu
+        version:
+          - 8
+          - 11
+          - 17
+          - 21
+          - 25
+        exclude:
+          - vendor: graalvm-ce
+            version: 8
+          - vendor: graalvm-ce
+            version: 11
+          - vendor: graalvm-ee
+            version: 8
+          - vendor: graalvm-ee
+            version: 11
+          - vendor: graalvm-ee
+            version: 17
+    env:
+      TAG: java${{ matrix.version }}_${{ matrix.vendor }}
+    steps:
+      - name: Git checkout for Github repository workspace
+        uses: actions/checkout@v7
+
+      - name: Setup QEMU for multiarch builds
+        uses: docker/setup-qemu-action@v4
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image for testing
+        uses: docker/build-push-action@v7
+        with:
+          context: ./java
+          file: ./java/${{ matrix.vendor }}/Dockerfile
+          load: true
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE }}:base_debian
+            JAVA_VERSION=${{ matrix.version }}
+
+      - name: Test image
+        run: docker run --rm -e STARTUP="java -version" "$IMAGE:$TAG"
+
+      - name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./java
+          file: ./java/${{ matrix.vendor }}/Dockerfile
+          platforms: ${{ env.PLATFORMS }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE }}:base_debian
+            JAVA_VERSION=${{ matrix.version }}
+
+  nodejs:
+    name: "nodejs${{ matrix.version }}"
+    needs: base
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - 22
+          - 24
+    env:
+      TAG: nodejs${{ matrix.version }}
+    steps:
+      - name: Git checkout for Github repository workspace
+        uses: actions/checkout@v7
+
+      - name: Setup QEMU for multiarch builds
+        uses: docker/setup-qemu-action@v4
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image for testing
+        uses: docker/build-push-action@v7
+        with:
+          context: ./nodejs
+          load: true
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE }}:base_debian
+            NODE_VERSION=${{ matrix.version }}
+
+      - name: Test image
+        run: docker run --rm -e STARTUP="npm --version" "$IMAGE:$TAG"
+
+      - name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./nodejs
+          platforms: ${{ env.PLATFORMS }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE }}:base_debian
+            NODE_VERSION=${{ matrix.version }}
