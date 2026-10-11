@@ -1,4 +1,4 @@
-FROM        alpine:3.24
+FROM        --platform=$TARGETOS/$TARGETARCH alpine:3.24
 
 # Metadata
 LABEL       org.opencontainers.image.source="https://github.com/calagopus/oci-images"

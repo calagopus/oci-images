@@ -1,4 +1,4 @@
-FROM        debian:trixie-slim
+FROM        --platform=$TARGETOS/$TARGETARCH debian:trixie-slim
 
 # Metadata
 LABEL       org.opencontainers.image.source="https://github.com/calagopus/oci-images"

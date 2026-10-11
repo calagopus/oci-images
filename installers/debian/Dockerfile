@@ -1,6 +1,6 @@
 ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_debian
 
-FROM        ${BASE_IMAGE}
+FROM        --platform=$TARGETOS/$TARGETARCH ${BASE_IMAGE}
 
 # Metadata
 LABEL       org.opencontainers.image.title="installers_debian"

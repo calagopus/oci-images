@@ -1,11 +1,11 @@
 ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_debian
 ARG         JAVA_VERSION=25
 
-FROM        azul/zulu-openjdk:${JAVA_VERSION} AS jdk
+FROM        --platform=$TARGETOS/$TARGETARCH azul/zulu-openjdk:${JAVA_VERSION} AS jdk
 
 RUN         cp -aL "${JAVA_HOME}" /opt/jdk
 
-FROM        ${BASE_IMAGE}
+FROM        --platform=$TARGETOS/$TARGETARCH ${BASE_IMAGE}
 
 ARG         JAVA_VERSION
 

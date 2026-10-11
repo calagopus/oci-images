@@ -17,7 +17,7 @@ RUN         case "${TARGETARCH}" in \
             && mkdir /opt/jdk \
             && tar -xJf /tmp/jdk.tar.xz -C /opt/jdk --strip-components=1 --no-same-owner
 
-FROM        ${BASE_IMAGE}
+FROM        --platform=$TARGETOS/$TARGETARCH ${BASE_IMAGE}
 
 ARG         JAVA_VERSION
 
