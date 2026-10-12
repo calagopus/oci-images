@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Install SteamCMD and the app SRCDS_APPID into /mnt/server
+fail() {
+    echo "$1"
+    if [ -n "${INSTALL_STATUS_FILE}" ]; then
+        echo "$1" > "${INSTALL_STATUS_FILE}"
+    fi
+    exit 1
+}
+
+if [ "$(uname -m)" != "x86_64" ]; then
+    fail "SteamCMD only runs on x86_64."
+fi
+
+if [ -z "${SRCDS_APPID}" ]; then
+    fail "SRCDS_APPID is not set."
+fi
+
+if [ -z "${STEAM_USER}" ] || [ -z "${STEAM_PASS}" ]; then
+    STEAM_USER=anonymous
+    STEAM_PASS=""
+    STEAM_AUTH=""
+fi
+
+# Download SteamCMD
+mkdir -p /mnt/server/steamcmd /mnt/server/steamapps
+if ! curl -fsSL -o /tmp/steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz || ! tar -xzf /tmp/steamcmd.tar.gz -C /mnt/server/steamcmd; then
+    fail "SteamCMD could not be downloaded."
+fi
+rm -f /tmp/steamcmd.tar.gz
+
+# SteamCMD has to own the files and needs a home directory it can write to
+chown -R root:root /mnt
+export HOME=/mnt/server
+cd /mnt/server/steamcmd || fail "SteamCMD could not be downloaded."
+
+# shellcheck disable=SC2046,SC2086
+if ! ./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ "${WINDOWS_INSTALL}" == "1" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) $( [[ -z ${HLDS_GAME} ]] || printf %s "+app_set_config 90 mod ${HLDS_GAME}" ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s "-beta ${SRCDS_BETAID}" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s "-betapassword ${SRCDS_BETAPASS}" ) ${INSTALL_FLAGS} validate +quit; then
+    fail "SteamCMD could not install app ${SRCDS_APPID}."
+fi
+
+# Set up the Steam client libraries
+mkdir -p /mnt/server/.steam/sdk32 /mnt/server/.steam/sdk64
+cp linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so
+cp linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so

@@ -24,5 +24,8 @@ RUN         apt-get update \
             fi \
             && rm -rf /var/lib/apt/lists/*
 
+# Copy the installation scripts
+COPY        --chmod=755 scripts/ /usr/local/bin/
+
 ENTRYPOINT  []
 CMD         [ "/bin/bash" ]
