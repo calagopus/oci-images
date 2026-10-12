@@ -15,30 +15,31 @@ The images are built for the Calagopus project.
 
 ## Images
 
-Every image is a tag of `ghcr.io/calagopus/oci-images` and is built for `linux/amd64` and `linux/arm64`.
+Every image is a tag of `ghcr.io/calagopus/oci-images`. They are built for `linux/amd64` and `linux/arm64`, except `steamcmd_debian`, which is `linux/amd64` only.
 
 | Directory | Tags | Contents |
 | :--- | :--- | :--- |
-| [`base`](./base) | `base_alpine`, `base_debian`, `base_ubuntu` | Shared packages, the `container` user and the entrypoint |
-| [`installers`](./installers) | `installers_alpine`, `installers_debian`, `installers_ubuntu` | Tools for server installation scripts, runs as root |
+| [`base`](./base) | `base_alpine`, `base_debian`, `base_ubuntu` | Plain OS images with the shared packages, the `container` user and the entrypoint |
+| [`installers`](./installers) | `installers_alpine`, `installers_debian`, `installers_ubuntu` | For server installation scripts, run as root |
 | [`bun`](./bun) | `bun1` | Bun |
 | [`go`](./go) | `go1.26`, `go1.27` | Go |
 | [`java`](./java) | `java<version>_<vendor>`, for example `java21_temurin` | Java 8, 11, 17, 21 and 25 |
 | [`nodejs`](./nodejs) | `nodejs22`, `nodejs24` | Node.js |
 | [`python`](./python) | `python3.11`, `python3.12`, `python3.13`, `python3.14` | Python |
 | [`rust`](./rust) | `rust1` | Rust |
+| [`steamcmd`](./steamcmd) | `steamcmd_debian` | For Steam game servers |
 
 ## How the images are built
 
-Everything starts from a base image. The base images carry what all the other images share: the packages, the `container` user, `dumb-init` and the entrypoint. All of them use the same [`base/entrypoint.sh`](./base/entrypoint.sh), which is why they are built with `base` as the build context.
+Everything starts from a base image. It carries what the other images share: the packages, the `container` user, `dumb-init` and the entrypoint. All base images use the same [`base/entrypoint.sh`](./base/entrypoint.sh), which is why they are built with `base` as the build context.
 
-A runtime image takes the runtime from its official upstream image and copies it onto `base_debian`. It installs no packages of its own, and the version comes in as a build argument, so a single Dockerfile covers every version.
+When a server starts, the entrypoint runs the scripts in `/entrypoint.d/`, fills each `{{VARIABLE}}` in `STARTUP` with the matching environment variable and runs the result.
 
-The installer images sit on the base image of the same name. They run as `root` and have no entrypoint, since installation scripts are started with their own command.
+A runtime image takes the runtime from its official upstream image and copies it onto `base_debian`, together with a script for `/entrypoint.d/` that prints the version. It installs no packages of its own, and the version comes in as a build argument, so a single Dockerfile covers every version.
 
-When a server starts, the entrypoint runs the scripts in `/entrypoint.d/`, fills each `{{VARIABLE}}` in `STARTUP` with the matching environment variable and runs the result. Runtime images put a script in there that prints their version.
+The installer images and the SteamCMD image are built on the base image of the same name. Installers run as `root` and have no entrypoint, since installation scripts are started with their own command. The SteamCMD image adds the 32-bit libraries that Steam game servers need and a script that updates the server through SteamCMD before it starts.
 
-The [workflow](./.github/workflows/build.yml) builds the base images first. After that, every job builds its image, starts it once to make sure it works and then pushes it for both platforms.
+The [workflow](./.github/workflows/build.yml) builds the base images first. After that, every job builds its image, starts it once to make sure it works and then pushes it.
 
 To build an image yourself, run the commands from the root of the repository. The base image comes first, because the other images are built on it:
 
@@ -54,7 +55,7 @@ docker buildx build --build-arg JAVA_VERSION=21 -f java/temurin/Dockerfile -t gh
 | Add or remove a package | The Dockerfile of the base image |
 | Add or remove a version | The `matrix` of the job in the workflow |
 | Change how servers are started | `base/entrypoint.sh` |
-| Add a runtime | A new directory with a Dockerfile and an `entrypoint.d` script, a job copied from an existing one, and the directory in both `paths` lists of the workflow |
+| Add a runtime | A new directory with a Dockerfile and an `entrypoint.d` script, plus a job and the directory in both `paths` lists of the workflow |
 
 Every `FROM` line names its platform with `--platform=$TARGETOS/$TARGETARCH`. The only exception is the first stage of `java/shenandoah`, which downloads its JDK on the build platform because the upstream image only exists for `linux/amd64`.
 
