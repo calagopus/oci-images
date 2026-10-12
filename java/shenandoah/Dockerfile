@@ -11,6 +11,8 @@ USER        root
 RUN         case "${TARGETARCH}" in \
                 amd64) JAVA_ARCH="x86_64" ;; \
                 arm64) JAVA_ARCH="aarch64" ;; \
+                ppc64le) JAVA_ARCH="ppc64le" ;; \
+                riscv64) JAVA_ARCH="riscv64" ;; \
                 *) echo "Unsupported architecture: ${TARGETARCH}" >&2; exit 1 ;; \
             esac \
             && curl -fsSL --retry 3 -o /tmp/jdk.tar.xz "https://builds.shipilev.net/openjdk-jdk${JAVA_VERSION}/openjdk-jdk${JAVA_VERSION}-linux-${JAVA_ARCH}-server.tar.xz" \

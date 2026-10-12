@@ -43,7 +43,7 @@ concurrency:
 
 env:
   IMAGE: ghcr.io/calagopus/oci-images
-  PLATFORMS: linux/amd64,linux/arm64
+  PLATFORMS: linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64
 
 jobs:
   base:
@@ -128,7 +128,8 @@ jobs:
       - name: Build image for testing
         uses: docker/build-push-action@v7
         with:
-          context: ./installers/${{ matrix.installer }}
+          context: ./installers
+          file: ./installers/${{ matrix.installer }}/Dockerfile
           load: true
           tags: ${{ env.IMAGE }}:${{ env.TAG }}
           build-args: |
@@ -140,7 +141,8 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v7
         with:
-          context: ./installers/${{ matrix.installer }}
+          context: ./installers
+          file: ./installers/${{ matrix.installer }}/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.IMAGE }}:${{ env.TAG }}
@@ -158,6 +160,7 @@ jobs:
           - "1"
     env:
       TAG: bun${{ matrix.version }}
+      PLATFORMS: linux/amd64,linux/arm64
     steps:
       - name: Git checkout for Github repository workspace
         uses: actions/checkout@v7
@@ -285,6 +288,11 @@ jobs:
             version: 17
     env:
       TAG: java${{ matrix.version }}_${{ matrix.vendor }}
+      PLATFORMS: >-
+        ${{ (matrix.vendor == 'shenandoah' || matrix.vendor == 'temurin') && matrix.version >= 17
+        && 'linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64'
+        || matrix.vendor == 'temurin' && 'linux/amd64,linux/arm64,linux/ppc64le'
+        || 'linux/amd64,linux/arm64' }}
     steps:
       - name: Git checkout for Github repository workspace
         uses: actions/checkout@v7
@@ -340,6 +348,7 @@ jobs:
           - 24
     env:
       TAG: nodejs${{ matrix.version }}
+      PLATFORMS: linux/amd64,linux/arm64,linux/ppc64le
     steps:
       - name: Git checkout for Github repository workspace
         uses: actions/checkout@v7
@@ -499,6 +508,7 @@ jobs:
           - debian
     env:
       TAG: steamcmd_${{ matrix.steamcmd }}
+      PLATFORMS: linux/amd64
     steps:
       - name: Git checkout for Github repository workspace
         uses: actions/checkout@v7
@@ -534,7 +544,7 @@ jobs:
         with:
           context: ./steamcmd
           file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
-          platforms: linux/amd64
+          platforms: ${{ env.PLATFORMS }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.IMAGE }}:${{ env.TAG }}
           build-args: |
@@ -553,6 +563,7 @@ jobs:
           - devel
     env:
       TAG: wine_${{ matrix.branch }}
+      PLATFORMS: linux/amd64
     steps:
       - name: Git checkout for Github repository workspace
         uses: actions/checkout@v7
@@ -587,7 +598,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ./wine
-          platforms: linux/amd64
+          platforms: ${{ env.PLATFORMS }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.IMAGE }}:${{ env.TAG }}
           build-args: |
