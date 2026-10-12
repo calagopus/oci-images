@@ -19,8 +19,8 @@ Every image is a tag of `ghcr.io/calagopus/oci-images` and is built for `linux/a
 
 | Directory | Tags | Contents |
 | :--- | :--- | :--- |
-| [`base`](./base) | `base_alpine`, `base_debian` | Shared packages, the `container` user and the entrypoint |
-| [`installers`](./installers) | `installers_alpine`, `installers_debian` | Tools for server installation scripts, runs as root |
+| [`base`](./base) | `base_alpine`, `base_debian`, `base_ubuntu` | Shared packages, the `container` user and the entrypoint |
+| [`installers`](./installers) | `installers_alpine`, `installers_debian`, `installers_ubuntu` | Tools for server installation scripts, runs as root |
 | [`bun`](./bun) | `bun1` | Bun |
 | [`go`](./go) | `go1.26`, `go1.27` | Go |
 | [`java`](./java) | `java<version>_<vendor>`, for example `java21_temurin` | Java 8, 11, 17, 21 and 25 |
@@ -30,7 +30,7 @@ Every image is a tag of `ghcr.io/calagopus/oci-images` and is built for `linux/a
 
 ## How the images are built
 
-Everything starts from a base image. The base images carry what all the other images share: the packages, the `container` user, `dumb-init` and the entrypoint. Both of them use the same [`base/entrypoint.sh`](./base/entrypoint.sh), which is why they are built with `base` as the build context.
+Everything starts from a base image. The base images carry what all the other images share: the packages, the `container` user, `dumb-init` and the entrypoint. All of them use the same [`base/entrypoint.sh`](./base/entrypoint.sh), which is why they are built with `base` as the build context.
 
 A runtime image takes the runtime from its official upstream image and copies it onto `base_debian`. It installs no packages of its own, and the version comes in as a build argument, so a single Dockerfile covers every version.
 
