@@ -1,4 +1,4 @@
-ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:ubuntu
+ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_ubuntu
 
 FROM        --platform=$TARGETOS/$TARGETARCH ${BASE_IMAGE}
 
@@ -16,9 +16,6 @@ RUN         apt-get update \
             && apt-get install -y --no-install-recommends \
                 file \
                 jq \
-                ca-certificates \
-                curl \
-                git \
                 unzip \
                 wget \
                 zip \
