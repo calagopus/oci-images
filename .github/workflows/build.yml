@@ -51,6 +51,7 @@ jobs:
         base:
           - alpine
           - debian
+          - ubuntu
     env:
       TAG: base_${{ matrix.base }}
     steps:
@@ -100,6 +101,7 @@ jobs:
         installer:
           - alpine
           - debian
+          - ubuntu
     env:
       TAG: installers_${{ matrix.installer }}
     steps:
