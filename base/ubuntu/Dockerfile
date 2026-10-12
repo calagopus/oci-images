@@ -18,7 +18,7 @@ RUN         apt-get update \
                 iproute2 \
                 libfreetype6 \
                 libgif7 \
-                libjpeg62-turbo \
+                libjpeg62 \
                 libncursesw6 \
                 libstdc++6 \
                 locales \
