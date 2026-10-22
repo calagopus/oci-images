@@ -210,6 +210,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
+          - "1.24"
+          - "1.25"
           - "1.26"
           - "1.27"
     env:
@@ -275,21 +277,33 @@ jobs:
           - 17
           - 21
           - 25
+          - 26
+          - 27
         exclude:
           - vendor: graalvm-ce
             version: 8
           - vendor: graalvm-ce
             version: 11
+          - vendor: graalvm-ce
+            version: 26
+          - vendor: graalvm-ce
+            version: 27
           - vendor: graalvm-ee
             version: 8
           - vendor: graalvm-ee
             version: 11
           - vendor: graalvm-ee
             version: 17
+          - vendor: graalvm-ee
+            version: 26
+          - vendor: graalvm-ee
+            version: 27
+          - vendor: zulu
+            version: 27
     env:
       TAG: java${{ matrix.version }}_${{ matrix.vendor }}
       PLATFORMS: >-
-        ${{ (matrix.vendor == 'shenandoah' || matrix.vendor == 'temurin') && matrix.version >= 17
+        ${{ matrix.vendor == 'shenandoah' && matrix.version >= 17
         && 'linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64'
         || matrix.vendor == 'temurin' && 'linux/amd64,linux/arm64,linux/ppc64le'
         || 'linux/amd64,linux/arm64' }}
@@ -320,6 +334,7 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ env.IMAGE }}:base_debian
             JAVA_VERSION=${{ matrix.version }}
+            GRAALVM_TAG=${{ matrix.version < 25 && matrix.version || format('{0}i-ol10', matrix.version) }}
 
       - name: Test image
         run: docker run --rm -e STARTUP="java -version" "$IMAGE:$TAG"
@@ -335,6 +350,7 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ env.IMAGE }}:base_debian
             JAVA_VERSION=${{ matrix.version }}
+            GRAALVM_TAG=${{ matrix.version < 25 && matrix.version || format('{0}i-ol10', matrix.version) }}
 
   nodejs:
     name: "nodejs${{ matrix.version }}"
@@ -344,8 +360,15 @@ jobs:
       fail-fast: false
       matrix:
         version:
+          - 18
+          - 19
+          - 20
+          - 21
           - 22
+          - 23
           - 24
+          - 25
+          - 26
     env:
       TAG: nodejs${{ matrix.version }}
       PLATFORMS: linux/amd64,linux/arm64,linux/ppc64le
@@ -398,10 +421,13 @@ jobs:
       fail-fast: false
       matrix:
         version:
+          - "3.9"
+          - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
     env:
       TAG: python${{ matrix.version }}
     steps:
@@ -506,6 +532,7 @@ jobs:
       matrix:
         steamcmd:
           - debian
+          - ubuntu
     env:
       TAG: steamcmd_${{ matrix.steamcmd }}
       PLATFORMS: linux/amd64
@@ -549,6 +576,68 @@ jobs:
           tags: ${{ env.IMAGE }}:${{ env.TAG }}
           build-args: |
             BASE_IMAGE=${{ env.IMAGE }}:base_${{ matrix.steamcmd }}
+
+  steamcmd-runtimes:
+    name: "steamcmd_${{ matrix.steamcmd }}"
+    needs: steamcmd
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - steamcmd: dotnet
+            base: steamcmd_debian
+            test: dotnet --list-runtimes
+          - steamcmd: proton
+            base: steamcmd_debian
+            test: proton run cmd.exe /c exit 0
+          - steamcmd: sniper
+            base: base_debian
+            test: test -e /lib/ld-linux.so.2
+    env:
+      TAG: steamcmd_${{ matrix.steamcmd }}
+      PLATFORMS: linux/amd64
+      TEST: ${{ matrix.test }}
+    steps:
+      - name: Git checkout for Github repository workspace
+        uses: actions/checkout@v7
+
+      - name: Setup QEMU for multiarch builds
+        uses: docker/setup-qemu-action@v4
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image for testing
+        uses: docker/build-push-action@v7
+        with:
+          context: ./steamcmd
+          file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
+          load: true
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE }}:${{ matrix.base }}
+
+      - name: Test image
+        run: docker run --rm -e AUTO_UPDATE=0 -e STARTUP="$TEST" "$IMAGE:$TAG"
+
+      - name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./steamcmd
+          file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
+          platforms: ${{ env.PLATFORMS }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE }}:${{ matrix.base }}
 
   wine:
     name: "wine_${{ matrix.branch }}"

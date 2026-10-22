@@ -1,9 +1,10 @@
 ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_debian
 ARG         JAVA_VERSION=25
 
-FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:${JAVA_VERSION}-jdk-noble AS jdk
+FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:${JAVA_VERSION}-jdk AS jdk
 
-RUN         cp -aL "${JAVA_HOME}" /opt/jdk
+RUN         cp -aL "${JAVA_HOME}" /opt/jdk \
+            && rm -rf /opt/jdk/jmods
 
 FROM        --platform=$TARGETOS/$TARGETARCH ${BASE_IMAGE}
 

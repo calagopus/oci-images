@@ -1,9 +1,11 @@
 ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_debian
 ARG         JAVA_VERSION=25
+ARG         GRAALVM_TAG=${JAVA_VERSION}i-ol10
 
-FROM        --platform=$TARGETOS/$TARGETARCH ghcr.io/graalvm/jdk-community:${JAVA_VERSION} AS jdk
+FROM        --platform=$TARGETOS/$TARGETARCH ghcr.io/graalvm/jdk-community:${GRAALVM_TAG} AS jdk
 
-RUN         cp -aL "${JAVA_HOME}" /opt/jdk
+RUN         cp -aL "${JAVA_HOME}" /opt/jdk \
+            && rm -rf /opt/jdk/jmods
 
 FROM        --platform=$TARGETOS/$TARGETARCH ${BASE_IMAGE}
 

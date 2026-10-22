@@ -22,15 +22,15 @@ Every image is a tag of `ghcr.io/calagopus/oci-images`. The platforms are `linux
 | [`base`](./base) | `base_alpine`, `base_debian`, `base_ubuntu` | All | Plain OS images with the shared packages, the `container` user and the entrypoint |
 | [`installers`](./installers) | `installers_alpine`, `installers_debian`, `installers_ubuntu` | All | For server installation scripts, run as root |
 | [`bun`](./bun) | `bun1` | `amd64`, `arm64` | Bun |
-| [`go`](./go) | `go1.26`, `go1.27` | All | Go |
-| [`java`](./java) | `java<version>_<vendor>`, for example `java21_temurin` | `amd64`, `arm64`, more for some vendors | Java 8, 11, 17, 21 and 25 |
-| [`nodejs`](./nodejs) | `nodejs22`, `nodejs24` | `amd64`, `arm64`, `ppc64le` | Node.js |
-| [`python`](./python) | `python3.11`, `python3.12`, `python3.13`, `python3.14` | All | Python |
+| [`go`](./go) | `go1.24`, `go1.25`, `go1.26`, `go1.27` | All | Go |
+| [`java`](./java) | `java<version>_<vendor>`, for example `java21_temurin` | `amd64`, `arm64`, more for some vendors | Java 8, 11, 17, 21, 25, 26 and 27 |
+| [`nodejs`](./nodejs) | `nodejs18`, `nodejs19`, `nodejs20`, `nodejs21`, `nodejs22`, `nodejs23`, `nodejs24`, `nodejs25`, `nodejs26` | `amd64`, `arm64`, `ppc64le` | Node.js |
+| [`python`](./python) | `python3.9`, `python3.10`, `python3.11`, `python3.12`, `python3.13`, `python3.14`, `python3.15` | All | Python |
 | [`rust`](./rust) | `rust1` | All | Rust |
-| [`steamcmd`](./steamcmd) | `steamcmd_debian` | `amd64` | For Steam game servers |
+| [`steamcmd`](./steamcmd) | `steamcmd_debian`, `steamcmd_ubuntu`, `steamcmd_dotnet`, `steamcmd_proton`, `steamcmd_sniper` | `amd64` | For Steam game servers |
 | [`wine`](./wine) | `wine_stable`, `wine_staging`, `wine_devel` | `amd64` | For Windows game servers |
 
-Of the Java images, Temurin is also built for `ppc64le`. From Java 17 on, Temurin and Shenandoah are built for all four platforms.
+Of the Java images, Temurin is also built for `ppc64le`, and Shenandoah from Java 17 on for all four platforms.
 
 ## How the images are built
 
@@ -40,12 +40,12 @@ The other images build on that:
 
 - **Runtime images** take the runtime from its official upstream image and copy it onto `base_debian`, together with a script for `/entrypoint.d/` that prints the version. They install no packages of their own, and the version comes in as a build argument, so a single Dockerfile covers every version.
 - **Installer images** are built on the base image of the same name. They run as `root` and have no entrypoint, since installation scripts are started with their own command. The Debian and Ubuntu installers come with [`steamcmd-install`](./installers/scripts/steamcmd-install), which installs SteamCMD and the app set in `SRCDS_APPID` and reports a failed installation. The installation script of a Steam game can be that one command.
-- **The SteamCMD image** is built on `base_debian`. It adds the 32-bit libraries that Steam game servers need and a script that updates the server through SteamCMD before it starts.
+- **The SteamCMD images** are built on `base_debian` and `base_ubuntu`. They add the 32-bit libraries that Steam game servers need and a script that updates the server through SteamCMD before it starts. The .NET and Proton images add the .NET runtimes and GE-Proton to `steamcmd_debian`, and the Sniper image is Valve's Steam Runtime 3 with the same entrypoint.
 - **The Wine images** are built on `steamcmd_debian`, because most Windows game servers are installed and updated through SteamCMD. They add Wine from the WineHQ repository, with the branch as a build argument, and Winetricks. Their script starts a virtual display and installs what `WINETRICKS_RUN` lists.
 
 Where several Dockerfiles share files, as in `base`, `installers`, `java` and `steamcmd`, each Dockerfile has its own subdirectory and the directory above it is the build context.
 
-The [workflow](./.github/workflows/build.yml) builds the base images first, and `steamcmd_debian` before the Wine images. Every job builds its image, starts it once to make sure it works and then pushes it.
+The [workflow](./.github/workflows/build.yml) builds the base images first, and `steamcmd_debian` before the .NET, Proton and Wine images. Every job builds its image, starts it once to make sure it works and then pushes it.
 
 To build an image yourself, run the commands from the root of the repository. The base image comes first, because the other images are built on it:
 

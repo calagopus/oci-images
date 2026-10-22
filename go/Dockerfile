@@ -3,6 +3,8 @@ ARG         GO_VERSION=1.27
 
 FROM        --platform=$TARGETOS/$TARGETARCH golang:${GO_VERSION}-trixie AS go
 
+RUN         rm -rf /usr/local/go/api /usr/local/go/test
+
 FROM        --platform=$TARGETOS/$TARGETARCH ${BASE_IMAGE}
 
 ARG         GO_VERSION

@@ -3,7 +3,8 @@ ARG         JAVA_VERSION=25
 
 FROM        --platform=$TARGETOS/$TARGETARCH amazoncorretto:${JAVA_VERSION} AS jdk
 
-RUN         cp -aL "${JAVA_HOME}" /opt/jdk
+RUN         cp -aL "${JAVA_HOME}" /opt/jdk \
+            && rm -rf /opt/jdk/jmods
 
 FROM        --platform=$TARGETOS/$TARGETARCH ${BASE_IMAGE}
 

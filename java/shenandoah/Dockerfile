@@ -17,7 +17,10 @@ RUN         case "${TARGETARCH}" in \
             esac \
             && curl -fsSL --retry 3 -o /tmp/jdk.tar.xz "https://builds.shipilev.net/openjdk-jdk${JAVA_VERSION}/openjdk-jdk${JAVA_VERSION}-linux-${JAVA_ARCH}-server.tar.xz" \
             && mkdir /opt/jdk \
-            && tar -xJf /tmp/jdk.tar.xz -C /opt/jdk --strip-components=1 --no-same-owner
+            && tar -xJf /tmp/jdk.tar.xz -C /opt/jdk --strip-components=1 --no-same-owner \
+            && test -x /opt/jdk/bin/java \
+            && find /opt/jdk -type d \( -name fastdebug -o -name slowdebug \) -prune -exec rm -rf {} + \
+            && rm -rf /opt/jdk/jmods
 
 FROM        --platform=$TARGETOS/$TARGETARCH ${BASE_IMAGE}
 
