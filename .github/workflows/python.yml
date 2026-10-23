@@ -1,0 +1,27 @@
+name: python
+
+on:
+  workflow_call:
+
+jobs:
+  python:
+    name: "python${{ matrix.version }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        version:
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+          - "3.15"
+    uses: ./.github/workflows/image.yml
+    with:
+      tag: python${{ matrix.version }}
+      base: base_debian
+      context: ./python
+      build-args: PYTHON_VERSION=${{ matrix.version }}
+      test: pip --version

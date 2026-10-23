@@ -1,0 +1,22 @@
+name: bun
+
+on:
+  workflow_call:
+
+jobs:
+  bun:
+    name: "bun${{ matrix.version }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        version:
+          - "1"
+    uses: ./.github/workflows/image.yml
+    with:
+      tag: bun${{ matrix.version }}
+      base: base_debian
+      context: ./bun
+      build-args: BUN_VERSION=${{ matrix.version }}
+      platforms: linux/amd64,linux/arm64
+      test: bun --version

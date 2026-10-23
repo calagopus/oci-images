@@ -1,0 +1,24 @@
+name: installers
+
+on:
+  workflow_call:
+
+jobs:
+  installers:
+    name: "installers_${{ matrix.installer }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        installer:
+          - alpine
+          - debian
+          - ubuntu
+    uses: ./.github/workflows/image.yml
+    with:
+      tag: installers_${{ matrix.installer }}
+      base: base_${{ matrix.installer }}
+      context: ./installers
+      file: ./installers/${{ matrix.installer }}/Dockerfile
+      entrypoint: false
+      test: 'test "$(id -u)" = 0 && jq --version'

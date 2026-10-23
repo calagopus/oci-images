@@ -1,0 +1,112 @@
+name: image
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: Tag of the image, for example java21_temurin
+        required: true
+        type: string
+      base:
+        description: Tag of the image to build on, passed as BASE_IMAGE
+        required: false
+        type: string
+        default: ""
+      context:
+        description: Build context
+        required: true
+        type: string
+      file:
+        description: Dockerfile, when it is not in the build context
+        required: false
+        type: string
+        default: ""
+      build-args:
+        description: Further build arguments, one per line
+        required: false
+        type: string
+        default: ""
+      platforms:
+        description: Platforms to build and push
+        required: false
+        type: string
+        default: linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64
+      test:
+        description: Command the test run starts
+        required: true
+        type: string
+      test-env:
+        description: Further environment variables for the test run, separated by spaces
+        required: false
+        type: string
+        default: ""
+      entrypoint:
+        description: Start the test command through the entrypoint as STARTUP
+        required: false
+        type: boolean
+        default: true
+
+env:
+  IMAGE: ghcr.io/calagopus/oci-images
+
+jobs:
+  image:
+    name: build
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Git checkout for Github repository workspace
+        uses: actions/checkout@v7
+
+      - name: Setup QEMU for multiarch builds
+        uses: docker/setup-qemu-action@v4
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image for testing
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.file }}
+          load: true
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            ${{ inputs.base && format('BASE_IMAGE={0}:{1}', env.IMAGE, inputs.base) || '' }}
+            ${{ inputs.build-args }}
+
+      - name: Test image
+        env:
+          TEST: ${{ inputs.test }}
+          TEST_ENV: ${{ inputs.test-env }}
+          ENTRYPOINT: ${{ inputs.entrypoint }}
+        run: |
+          options=(--rm -e AUTO_UPDATE=0)
+          for variable in $TEST_ENV; do
+            options+=(-e "$variable")
+          done
+          if [ "$ENTRYPOINT" = "true" ]; then
+            docker run "${options[@]}" -e STARTUP="$TEST" "$IMAGE:$TAG"
+          else
+            docker run "${options[@]}" "$IMAGE:$TAG" sh -c "$TEST"
+          fi
+
+      - name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.file }}
+          platforms: ${{ inputs.platforms }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            ${{ inputs.base && format('BASE_IMAGE={0}:{1}', env.IMAGE, inputs.base) || '' }}
+            ${{ inputs.build-args }}

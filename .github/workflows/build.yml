@@ -8,7 +8,7 @@ on:
     branches:
       - main
     paths:
-      - .github/workflows/build.yml
+      - .github/workflows/**
       - base/**
       - bun/**
       - go/**
@@ -19,9 +19,10 @@ on:
       - rust/**
       - steamcmd/**
       - wine/**
+      - "!**/*.md"
   pull_request:
     paths:
-      - .github/workflows/build.yml
+      - .github/workflows/**
       - base/**
       - bun/**
       - go/**
@@ -32,6 +33,7 @@ on:
       - rust/**
       - steamcmd/**
       - wine/**
+      - "!**/*.md"
 
 permissions:
   contents: read
@@ -41,655 +43,142 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  IMAGE: ghcr.io/calagopus/oci-images
-  PLATFORMS: linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64
-
 jobs:
-  base:
-    name: "base_${{ matrix.base }}"
+  changes:
+    name: changes
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        base:
-          - alpine
-          - debian
-          - ubuntu
-    env:
-      TAG: base_${{ matrix.base }}
+    outputs:
+      base: ${{ steps.changes.outputs.base }}
+      installers: ${{ steps.changes.outputs.installers }}
+      bun: ${{ steps.changes.outputs.bun }}
+      go: ${{ steps.changes.outputs.go }}
+      java: ${{ steps.changes.outputs.java }}
+      nodejs: ${{ steps.changes.outputs.nodejs }}
+      python: ${{ steps.changes.outputs.python }}
+      rust: ${{ steps.changes.outputs.rust }}
+      steamcmd: ${{ steps.changes.outputs.steamcmd }}
+      wine: ${{ steps.changes.outputs.wine }}
     steps:
       - name: Git checkout for Github repository workspace
         uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./base
-          file: ./base/${{ matrix.base }}/Dockerfile
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+      - name: Find the images to build
+        id: changes
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          all=true
+          if [ "$EVENT" = "push" ] && git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            all=false
+            changed=$(git diff --name-only "$BEFORE" HEAD -- . ':!*.md')
+          elif [ "$EVENT" = "pull_request" ]; then
+            all=false
+            changed=$(git diff --name-only "origin/${BASE_REF}...HEAD" -- . ':!*.md')
+          fi
+          for image in base installers bun go java nodejs python rust steamcmd wine; do
+            if [ "$all" = "true" ] || grep -q -e "^${image}/" -e "^\.github/workflows/" <<< "$changed"; then
+              echo "${image}=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "${image}=false" >> "$GITHUB_OUTPUT"
+            fi
+          done
 
-      - name: Test image
-        run: docker run --rm -e STARTUP="id" "$IMAGE:$TAG"
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./base
-          file: ./base/${{ matrix.base }}/Dockerfile
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+  base:
+    name: base
+    needs: changes
+    if: needs.changes.outputs.base == 'true'
+    uses: ./.github/workflows/base.yml
 
   installers:
-    name: "installers_${{ matrix.installer }}"
-    needs: base
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        installer:
-          - alpine
-          - debian
-          - ubuntu
-    env:
-      TAG: installers_${{ matrix.installer }}
-    steps:
-      - name: Git checkout for Github repository workspace
-        uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./installers
-          file: ./installers/${{ matrix.installer }}/Dockerfile
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_${{ matrix.installer }}
-
-      - name: Test image
-        run: docker run --rm "$IMAGE:$TAG" sh -c 'test "$(id -u)" = 0 && jq --version'
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./installers
-          file: ./installers/${{ matrix.installer }}/Dockerfile
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_${{ matrix.installer }}
+    name: installers
+    needs:
+      - changes
+      - base
+    if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.installers == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/installers.yml
 
   bun:
-    name: "bun${{ matrix.version }}"
-    needs: base
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - "1"
-    env:
-      TAG: bun${{ matrix.version }}
-      PLATFORMS: linux/amd64,linux/arm64
-    steps:
-      - name: Git checkout for Github repository workspace
-        uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./bun
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            BUN_VERSION=${{ matrix.version }}
-
-      - name: Test image
-        run: docker run --rm -e STARTUP="bun --version" "$IMAGE:$TAG"
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./bun
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            BUN_VERSION=${{ matrix.version }}
+    name: bun
+    needs:
+      - changes
+      - base
+      - installers
+    if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.bun == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/bun.yml
 
   go:
-    name: "go${{ matrix.version }}"
-    needs: base
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - "1.24"
-          - "1.25"
-          - "1.26"
-          - "1.27"
-    env:
-      TAG: go${{ matrix.version }}
-    steps:
-      - name: Git checkout for Github repository workspace
-        uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./go
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            GO_VERSION=${{ matrix.version }}
-
-      - name: Test image
-        run: docker run --rm -e STARTUP="go version" "$IMAGE:$TAG"
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./go
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            GO_VERSION=${{ matrix.version }}
+    name: go
+    needs:
+      - changes
+      - base
+      - bun
+    if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.go == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/go.yml
 
   java:
-    name: "java${{ matrix.version }}_${{ matrix.vendor }}"
-    needs: base
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        vendor:
-          - corretto
-          - graalvm-ce
-          - graalvm-ee
-          - shenandoah
-          - temurin
-          - zulu
-        version:
-          - 8
-          - 11
-          - 17
-          - 21
-          - 25
-          - 26
-          - 27
-        exclude:
-          - vendor: graalvm-ce
-            version: 8
-          - vendor: graalvm-ce
-            version: 11
-          - vendor: graalvm-ce
-            version: 26
-          - vendor: graalvm-ce
-            version: 27
-          - vendor: graalvm-ee
-            version: 8
-          - vendor: graalvm-ee
-            version: 11
-          - vendor: graalvm-ee
-            version: 17
-          - vendor: graalvm-ee
-            version: 26
-          - vendor: graalvm-ee
-            version: 27
-          - vendor: zulu
-            version: 27
-    env:
-      TAG: java${{ matrix.version }}_${{ matrix.vendor }}
-      PLATFORMS: >-
-        ${{ matrix.vendor == 'shenandoah' && matrix.version >= 17
-        && 'linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64'
-        || matrix.vendor == 'temurin' && 'linux/amd64,linux/arm64,linux/ppc64le'
-        || 'linux/amd64,linux/arm64' }}
-    steps:
-      - name: Git checkout for Github repository workspace
-        uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./java
-          file: ./java/${{ matrix.vendor }}/Dockerfile
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            JAVA_VERSION=${{ matrix.version }}
-            GRAALVM_TAG=${{ matrix.version < 25 && matrix.version || format('{0}i-ol10', matrix.version) }}
-
-      - name: Test image
-        run: docker run --rm -e STARTUP="java -version" "$IMAGE:$TAG"
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./java
-          file: ./java/${{ matrix.vendor }}/Dockerfile
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            JAVA_VERSION=${{ matrix.version }}
-            GRAALVM_TAG=${{ matrix.version < 25 && matrix.version || format('{0}i-ol10', matrix.version) }}
+    name: java
+    needs:
+      - changes
+      - base
+      - go
+    if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.java == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/java.yml
 
   nodejs:
-    name: "nodejs${{ matrix.version }}"
-    needs: base
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - 18
-          - 19
-          - 20
-          - 21
-          - 22
-          - 23
-          - 24
-          - 25
-          - 26
-    env:
-      TAG: nodejs${{ matrix.version }}
-      PLATFORMS: linux/amd64,linux/arm64,linux/ppc64le
-    steps:
-      - name: Git checkout for Github repository workspace
-        uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./nodejs
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            NODE_VERSION=${{ matrix.version }}
-
-      - name: Test image
-        run: docker run --rm -e STARTUP="npm --version" "$IMAGE:$TAG"
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./nodejs
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            NODE_VERSION=${{ matrix.version }}
+    name: nodejs
+    needs:
+      - changes
+      - base
+      - java
+    if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.nodejs == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/nodejs.yml
 
   python:
-    name: "python${{ matrix.version }}"
-    needs: base
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - "3.9"
-          - "3.10"
-          - "3.11"
-          - "3.12"
-          - "3.13"
-          - "3.14"
-          - "3.15"
-    env:
-      TAG: python${{ matrix.version }}
-    steps:
-      - name: Git checkout for Github repository workspace
-        uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./python
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            PYTHON_VERSION=${{ matrix.version }}
-
-      - name: Test image
-        run: docker run --rm -e STARTUP="pip --version" "$IMAGE:$TAG"
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./python
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            PYTHON_VERSION=${{ matrix.version }}
+    name: python
+    needs:
+      - changes
+      - base
+      - nodejs
+    if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.python == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/python.yml
 
   rust:
-    name: "rust${{ matrix.version }}"
-    needs: base
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        version:
-          - "1"
-    env:
-      TAG: rust${{ matrix.version }}
-    steps:
-      - name: Git checkout for Github repository workspace
-        uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./rust
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            RUST_VERSION=${{ matrix.version }}
-
-      - name: Test image
-        run: docker run --rm -e STARTUP="cargo --version" "$IMAGE:$TAG"
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./rust
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_debian
-            RUST_VERSION=${{ matrix.version }}
+    name: rust
+    needs:
+      - changes
+      - base
+      - python
+    if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.rust == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/rust.yml
 
   steamcmd:
-    name: "steamcmd_${{ matrix.steamcmd }}"
-    needs: base
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        steamcmd:
-          - debian
-          - ubuntu
-    env:
-      TAG: steamcmd_${{ matrix.steamcmd }}
-      PLATFORMS: linux/amd64
-    steps:
-      - name: Git checkout for Github repository workspace
-        uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./steamcmd
-          file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_${{ matrix.steamcmd }}
-
-      - name: Test image
-        run: docker run --rm -e AUTO_UPDATE=0 -e STARTUP="test -e /lib/ld-linux.so.2" "$IMAGE:$TAG"
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./steamcmd
-          file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:base_${{ matrix.steamcmd }}
+    name: steamcmd
+    needs:
+      - changes
+      - base
+      - rust
+    if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.steamcmd == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/steamcmd.yml
 
   steamcmd-runtimes:
-    name: "steamcmd_${{ matrix.steamcmd }}"
-    needs: steamcmd
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - steamcmd: dotnet
-            base: steamcmd_debian
-            test: dotnet --list-runtimes
-          - steamcmd: proton
-            base: steamcmd_debian
-            test: proton run cmd.exe /c exit 0
-          - steamcmd: sniper
-            base: base_debian
-            test: test -e /lib/ld-linux.so.2
-    env:
-      TAG: steamcmd_${{ matrix.steamcmd }}
-      PLATFORMS: linux/amd64
-      TEST: ${{ matrix.test }}
-    steps:
-      - name: Git checkout for Github repository workspace
-        uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./steamcmd
-          file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:${{ matrix.base }}
-
-      - name: Test image
-        run: docker run --rm -e AUTO_UPDATE=0 -e STARTUP="$TEST" "$IMAGE:$TAG"
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./steamcmd
-          file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:${{ matrix.base }}
+    name: steamcmd-runtimes
+    needs:
+      - changes
+      - base
+      - steamcmd
+    if: ${{ !cancelled() && needs.base.result != 'failure' && needs.steamcmd.result != 'failure' && (needs.changes.outputs.steamcmd == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/steamcmd-runtimes.yml
 
   wine:
-    name: "wine_${{ matrix.branch }}"
-    needs: steamcmd
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        branch:
-          - stable
-          - staging
-          - devel
-    env:
-      TAG: wine_${{ matrix.branch }}
-      PLATFORMS: linux/amd64
-    steps:
-      - name: Git checkout for Github repository workspace
-        uses: actions/checkout@v7
-
-      - name: Setup QEMU for multiarch builds
-        uses: docker/setup-qemu-action@v4
-
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ./wine
-          load: true
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:steamcmd_debian
-            WINE_BRANCH=${{ matrix.branch }}
-
-      - name: Test image
-        run: docker run --rm -e AUTO_UPDATE=0 -e WINETRICKS_RUN=mono -e STARTUP="test -d .wine/drive_c/windows/mono" "$IMAGE:$TAG"
-
-      - name: Build and push image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./wine
-          platforms: ${{ env.PLATFORMS }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
-          build-args: |
-            BASE_IMAGE=${{ env.IMAGE }}:steamcmd_debian
-            WINE_BRANCH=${{ matrix.branch }}
+    name: wine
+    needs:
+      - changes
+      - base
+      - steamcmd
+      - steamcmd-runtimes
+    if: ${{ !cancelled() && needs.base.result != 'failure' && needs.steamcmd.result != 'failure' && (needs.changes.outputs.wine == 'true' || needs.changes.outputs.steamcmd == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/wine.yml

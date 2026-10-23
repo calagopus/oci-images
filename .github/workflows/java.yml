@@ -1,0 +1,63 @@
+name: java
+
+on:
+  workflow_call:
+
+jobs:
+  java:
+    name: "java${{ matrix.version }}_${{ matrix.vendor }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        vendor:
+          - corretto
+          - graalvm-ce
+          - graalvm-ee
+          - shenandoah
+          - temurin
+          - zulu
+        version:
+          - 8
+          - 11
+          - 17
+          - 21
+          - 25
+          - 26
+          - 27
+        exclude:
+          - vendor: graalvm-ce
+            version: 8
+          - vendor: graalvm-ce
+            version: 11
+          - vendor: graalvm-ce
+            version: 26
+          - vendor: graalvm-ce
+            version: 27
+          - vendor: graalvm-ee
+            version: 8
+          - vendor: graalvm-ee
+            version: 11
+          - vendor: graalvm-ee
+            version: 17
+          - vendor: graalvm-ee
+            version: 26
+          - vendor: graalvm-ee
+            version: 27
+          - vendor: zulu
+            version: 27
+    uses: ./.github/workflows/image.yml
+    with:
+      tag: java${{ matrix.version }}_${{ matrix.vendor }}
+      base: base_debian
+      context: ./java
+      file: ./java/${{ matrix.vendor }}/Dockerfile
+      build-args: |
+        JAVA_VERSION=${{ matrix.version }}
+        GRAALVM_TAG=${{ matrix.version < 25 && matrix.version || format('{0}i-ol10', matrix.version) }}
+      platforms: >-
+        ${{ matrix.vendor == 'shenandoah' && matrix.version >= 17
+        && 'linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64'
+        || matrix.vendor == 'temurin' && 'linux/amd64,linux/arm64,linux/ppc64le'
+        || 'linux/amd64,linux/arm64' }}
+      test: java -version

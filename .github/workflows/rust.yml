@@ -1,0 +1,21 @@
+name: rust
+
+on:
+  workflow_call:
+
+jobs:
+  rust:
+    name: "rust${{ matrix.version }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        version:
+          - "1"
+    uses: ./.github/workflows/image.yml
+    with:
+      tag: rust${{ matrix.version }}
+      base: base_debian
+      context: ./rust
+      build-args: RUST_VERSION=${{ matrix.version }}
+      test: cargo --version

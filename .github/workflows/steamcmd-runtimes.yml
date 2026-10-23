@@ -1,0 +1,30 @@
+name: steamcmd-runtimes
+
+on:
+  workflow_call:
+
+jobs:
+  steamcmd-runtimes:
+    name: "steamcmd_${{ matrix.steamcmd }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - steamcmd: dotnet
+            base: steamcmd_debian
+            test: dotnet --list-runtimes
+          - steamcmd: proton
+            base: steamcmd_debian
+            test: proton run cmd.exe /c exit 0
+          - steamcmd: sniper
+            base: base_debian
+            test: test -e /lib/ld-linux.so.2
+    uses: ./.github/workflows/image.yml
+    with:
+      tag: steamcmd_${{ matrix.steamcmd }}
+      base: ${{ matrix.base }}
+      context: ./steamcmd
+      file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
+      platforms: linux/amd64
+      test: ${{ matrix.test }}

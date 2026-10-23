@@ -1,0 +1,25 @@
+name: wine
+
+on:
+  workflow_call:
+
+jobs:
+  wine:
+    name: "wine_${{ matrix.branch }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        branch:
+          - stable
+          - staging
+          - devel
+    uses: ./.github/workflows/image.yml
+    with:
+      tag: wine_${{ matrix.branch }}
+      base: steamcmd_debian
+      context: ./wine
+      build-args: WINE_BRANCH=${{ matrix.branch }}
+      platforms: linux/amd64
+      test-env: WINETRICKS_RUN=mono
+      test: test -d .wine/drive_c/windows/mono

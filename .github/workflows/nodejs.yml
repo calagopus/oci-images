@@ -1,0 +1,30 @@
+name: nodejs
+
+on:
+  workflow_call:
+
+jobs:
+  nodejs:
+    name: "nodejs${{ matrix.version }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        version:
+          - 18
+          - 19
+          - 20
+          - 21
+          - 22
+          - 23
+          - 24
+          - 25
+          - 26
+    uses: ./.github/workflows/image.yml
+    with:
+      tag: nodejs${{ matrix.version }}
+      base: base_debian
+      context: ./nodejs
+      build-args: NODE_VERSION=${{ matrix.version }}
+      platforms: linux/amd64,linux/arm64,linux/ppc64le
+      test: npm --version

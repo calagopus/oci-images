@@ -1,0 +1,22 @@
+name: base
+
+on:
+  workflow_call:
+
+jobs:
+  base:
+    name: "base_${{ matrix.base }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        base:
+          - alpine
+          - debian
+          - ubuntu
+    uses: ./.github/workflows/image.yml
+    with:
+      tag: base_${{ matrix.base }}
+      context: ./base
+      file: ./base/${{ matrix.base }}/Dockerfile
+      test: id

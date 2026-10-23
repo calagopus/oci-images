@@ -1,0 +1,23 @@
+name: steamcmd
+
+on:
+  workflow_call:
+
+jobs:
+  steamcmd:
+    name: "steamcmd_${{ matrix.steamcmd }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        steamcmd:
+          - debian
+          - ubuntu
+    uses: ./.github/workflows/image.yml
+    with:
+      tag: steamcmd_${{ matrix.steamcmd }}
+      base: base_${{ matrix.steamcmd }}
+      context: ./steamcmd
+      file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
+      platforms: linux/amd64
+      test: test -e /lib/ld-linux.so.2
