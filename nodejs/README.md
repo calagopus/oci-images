@@ -16,6 +16,8 @@ Node.js, copied from the official image onto `base_debian`.
 
 There is no official Node.js image for `riscv64`. Node.js 25 and newer no longer include Corepack, and the official Node.js 26 image no longer includes Yarn.
 
+Node.js 18, 19, 20, 21, 23 and 25 are end of life and get no security fixes.
+
 ## Build
 
 Run from the root of the repository:

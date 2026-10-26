@@ -41,7 +41,9 @@ The upstream images of Corretto, GraalVM and Zulu only exist for `amd64` and `ar
 
 Java 27 is only built for Corretto, Shenandoah and Temurin so far, because Zulu and GraalVM have no Java 27 image yet.
 
-GraalVM CE for Java 17 and 21 is no longer updated upstream, so those images stay on 17.0.9 and 21.0.2. GraalVM CE 25 is built from the `25i-ol10` tag, because the plain `25` tag is no longer updated.
+GraalVM CE for Java 17 and 21 is no longer updated upstream, so those images stay on 17.0.9 and 21.0.2 and get no security fixes. GraalVM CE 25 is built from the `25i-ol10` tag, because the plain `25` tag is no longer updated.
+
+Java 26 is end of life: Temurin and Zulu 26 ended in September 2026, and Corretto 26 ends on 31 October 2026.
 
 The JDKs come without `jmods`, so `jlink` only works on JDKs that can link without them, such as Temurin 25. The Shenandoah JDKs also come without their debug JVMs.
 

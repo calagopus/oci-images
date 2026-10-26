@@ -36,7 +36,7 @@ Every image is a tag of `ghcr.io/calagopus/oci-images`. Each directory has a REA
 
 The base images hold the shared packages, the `container` user, `dumb-init` and the entrypoint. The runtime images copy their runtime from the official upstream image onto `base_debian`, and the installer, SteamCMD and Wine images add their packages on top. `steamcmd_sniper` is Valve's Steam Runtime 3 with the same entrypoint. When a server starts, the entrypoint runs the scripts in `/entrypoint.d/` and then `STARTUP`.
 
-Each directory has its own workflow in [`.github/workflows`](./.github/workflows) with its versions. [`build.yml`](./.github/workflows/build.yml) builds them one after another, one job at a time, and only what changed. The scheduled run on the 1st and 15th of every month builds everything.
+Each directory has its own workflow in [`.github/workflows`](./.github/workflows) with its versions. [`build.yml`](./.github/workflows/build.yml) builds them one after another, one job at a time, and only what changed. The scheduled run every Monday builds everything.
 
 To build an image yourself, start with its base image, from the root of the repository:
 

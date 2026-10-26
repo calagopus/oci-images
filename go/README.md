@@ -11,6 +11,8 @@ Go, copied from the official image onto `base_debian`.
 
 `GOPATH` is `/home/container/go`, so modules and installed tools stay with the server. `GOTOOLCHAIN` is `local`, so Go does not download another toolchain.
 
+Go 1.24 and 1.25 are end of life and get no security fixes.
+
 ## Build
 
 Run from the root of the repository:
