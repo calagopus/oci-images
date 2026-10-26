@@ -8,7 +8,7 @@ jobs:
     name: "base_${{ matrix.base }}"
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 1
       matrix:
         base:
           - alpine

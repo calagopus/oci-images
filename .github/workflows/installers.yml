@@ -8,7 +8,7 @@ jobs:
     name: "installers_${{ matrix.installer }}"
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 1
       matrix:
         installer:
           - alpine
