@@ -7,7 +7,8 @@ LABEL       org.opencontainers.image.title="base_alpine"
 LABEL       org.opencontainers.image.description="Alpine base image for the Calagopus images."
 
 # Install necessary packages
-RUN         apk add --no-cache \
+RUN         apk upgrade --no-cache \
+            && apk add --no-cache \
                 bash \
                 ca-certificates \
                 curl \

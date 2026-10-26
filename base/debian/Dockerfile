@@ -8,6 +8,7 @@ LABEL       org.opencontainers.image.description="Debian base image for the Cala
 
 # Install necessary packages
 RUN         apt-get update \
+            && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
             && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                 build-essential \
                 ca-certificates \
