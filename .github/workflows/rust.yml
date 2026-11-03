@@ -13,6 +13,7 @@ jobs:
         version:
           - "1"
     uses: ./.github/workflows/image.yml
+    secrets: inherit
     with:
       tag: rust${{ matrix.version }}
       base: base_debian

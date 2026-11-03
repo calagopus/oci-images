@@ -19,6 +19,7 @@ jobs:
           - "3.14"
           - "3.15"
     uses: ./.github/workflows/image.yml
+    secrets: inherit
     with:
       tag: python${{ matrix.version }}
       base: base_debian

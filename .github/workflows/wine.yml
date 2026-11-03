@@ -15,6 +15,7 @@ jobs:
           - staging
           - devel
     uses: ./.github/workflows/image.yml
+    secrets: inherit
     with:
       tag: wine_${{ matrix.branch }}
       base: steamcmd_debian

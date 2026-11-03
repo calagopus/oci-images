@@ -21,6 +21,7 @@ jobs:
             base: base_debian
             test: test -e /lib/ld-linux.so.2
     uses: ./.github/workflows/image.yml
+    secrets: inherit
     with:
       tag: steamcmd_${{ matrix.steamcmd }}
       base: ${{ matrix.base }}

@@ -15,7 +15,7 @@ The images are built for the Calagopus project.
 
 ## Images
 
-Every image is a tag of `ghcr.io/calagopus/oci-images`. Each directory has a README with all its tags and platforms.
+Every image is a tag of `ghcr.io/calagopus/oci-images`, and is also pushed to Docker Hub as `docker.io/calagopus/oci-images`. Each directory has a README with all its tags and platforms.
 
 | Directory | Tags | Platforms | Contents |
 | :--- | :--- | :--- | :--- |

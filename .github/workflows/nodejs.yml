@@ -21,6 +21,7 @@ jobs:
           - 25
           - 26
     uses: ./.github/workflows/image.yml
+    secrets: inherit
     with:
       tag: nodejs${{ matrix.version }}
       base: base_debian

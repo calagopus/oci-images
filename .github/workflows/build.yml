@@ -92,6 +92,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.base == 'true'
     uses: ./.github/workflows/base.yml
+    secrets: inherit
 
   installers:
     name: installers
@@ -100,6 +101,7 @@ jobs:
       - base
     if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.installers == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/installers.yml
+    secrets: inherit
 
   bun:
     name: bun
@@ -109,6 +111,7 @@ jobs:
       - installers
     if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.bun == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/bun.yml
+    secrets: inherit
 
   go:
     name: go
@@ -118,6 +121,7 @@ jobs:
       - bun
     if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.go == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/go.yml
+    secrets: inherit
 
   java:
     name: java
@@ -127,6 +131,7 @@ jobs:
       - go
     if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.java == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/java.yml
+    secrets: inherit
 
   nodejs:
     name: nodejs
@@ -136,6 +141,7 @@ jobs:
       - java
     if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.nodejs == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/nodejs.yml
+    secrets: inherit
 
   python:
     name: python
@@ -145,6 +151,7 @@ jobs:
       - nodejs
     if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.python == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/python.yml
+    secrets: inherit
 
   rust:
     name: rust
@@ -154,6 +161,7 @@ jobs:
       - python
     if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.rust == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/rust.yml
+    secrets: inherit
 
   steamcmd:
     name: steamcmd
@@ -163,6 +171,7 @@ jobs:
       - rust
     if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.steamcmd == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/steamcmd.yml
+    secrets: inherit
 
   steamcmd-runtimes:
     name: steamcmd-runtimes
@@ -172,6 +181,7 @@ jobs:
       - steamcmd
     if: ${{ !cancelled() && needs.base.result != 'failure' && needs.steamcmd.result != 'failure' && (needs.changes.outputs.steamcmd == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/steamcmd-runtimes.yml
+    secrets: inherit
 
   wine:
     name: wine
@@ -182,3 +192,4 @@ jobs:
       - steamcmd-runtimes
     if: ${{ !cancelled() && needs.base.result != 'failure' && needs.steamcmd.result != 'failure' && (needs.changes.outputs.wine == 'true' || needs.changes.outputs.steamcmd == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/wine.yml
+    secrets: inherit

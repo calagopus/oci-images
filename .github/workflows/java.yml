@@ -47,6 +47,7 @@ jobs:
           - vendor: zulu
             version: 27
     uses: ./.github/workflows/image.yml
+    secrets: inherit
     with:
       tag: java${{ matrix.version }}_${{ matrix.vendor }}
       base: base_debian

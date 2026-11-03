@@ -15,6 +15,7 @@ jobs:
           - debian
           - ubuntu
     uses: ./.github/workflows/image.yml
+    secrets: inherit
     with:
       tag: base_${{ matrix.base }}
       context: ./base

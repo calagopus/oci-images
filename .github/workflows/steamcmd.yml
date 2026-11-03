@@ -14,6 +14,7 @@ jobs:
           - debian
           - ubuntu
     uses: ./.github/workflows/image.yml
+    secrets: inherit
     with:
       tag: steamcmd_${{ matrix.steamcmd }}
       base: base_${{ matrix.steamcmd }}

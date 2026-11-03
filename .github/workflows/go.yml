@@ -16,6 +16,7 @@ jobs:
           - "1.26"
           - "1.27"
     uses: ./.github/workflows/image.yml
+    secrets: inherit
     with:
       tag: go${{ matrix.version }}
       base: base_debian

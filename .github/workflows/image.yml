@@ -47,7 +47,8 @@ on:
         default: true
 
 env:
-  IMAGE: ghcr.io/calagopus/oci-images
+  IMAGE: ghcr.io/${{ github.repository }}
+  DOCKERHUB_IMAGE: docker.io/${{ github.repository }}
 
 jobs:
   image:
@@ -65,12 +66,19 @@ jobs:
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
-      - name: Login to registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build image for testing
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -106,7 +114,9 @@ jobs:
           file: ${{ inputs.file }}
           platforms: ${{ inputs.platforms }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.IMAGE }}:${{ env.TAG }}
+          tags: |
+            ${{ env.IMAGE }}:${{ env.TAG }}
+            ${{ env.DOCKERHUB_IMAGE }}:${{ env.TAG }}
           build-args: |
             ${{ inputs.base && format('BASE_IMAGE={0}:{1}', env.IMAGE, inputs.base) || '' }}
             ${{ inputs.build-args }}
