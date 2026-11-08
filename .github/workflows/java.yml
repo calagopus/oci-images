@@ -44,8 +44,6 @@ jobs:
             version: 26
           - vendor: graalvm-ee
             version: 27
-          - vendor: zulu
-            version: 27
     uses: ./.github/workflows/image.yml
     secrets: inherit
     with:

@@ -36,14 +36,15 @@ A JDK, copied from the vendor onto `base_debian`. The tag is `java<version>_<ven
 | `java21_zulu` | `azul/zulu-openjdk` | `ghcr.io/calagopus/oci-images:java21_zulu` | Yes | Yes | No | No |
 | `java25_zulu` | `azul/zulu-openjdk` | `ghcr.io/calagopus/oci-images:java25_zulu` | Yes | Yes | No | No |
 | `java26_zulu` | `azul/zulu-openjdk` | `ghcr.io/calagopus/oci-images:java26_zulu` | Yes | Yes | No | No |
+| `java27_zulu` | `azul/zulu-openjdk` | `ghcr.io/calagopus/oci-images:java27_zulu` | Yes | Yes | No | No |
 
 The upstream images of Corretto, GraalVM and Zulu only exist for `amd64` and `arm64`. Temurin is built from Adoptium's default image, which has no `riscv64` build. The Shenandoah collector is not available on `ppc64le` and `riscv64` before Java 17, and the Java 8 build from Shipilev has no Shenandoah collector at all.
 
-Java 27 is only built for Corretto, Shenandoah and Temurin so far, because Zulu and GraalVM have no Java 27 image yet.
+Java 26 and 27 are not built for GraalVM, because GraalVM has no Java 26 or 27 image.
 
 GraalVM CE for Java 17 and 21 is no longer updated upstream, so those images stay on 17.0.9 and 21.0.2 and get no security fixes. GraalVM CE 25 is built from the `25i-ol10` tag, because the plain `25` tag is no longer updated.
 
-Java 26 is end of life: Temurin and Zulu 26 ended in September 2026, and Corretto 26 ends on 31 October 2026.
+Java 26 is end of life: Temurin and Zulu 26 ended in September 2026, and Corretto 26 ended on 31 October 2026.
 
 The JDKs come without `jmods`, so `jlink` only works on JDKs that can link without them, such as Temurin 25. The Shenandoah JDKs also come without their debug JVMs.
 
