@@ -19,5 +19,5 @@ Python 3.9 and 3.10 are end of life and get no security fixes.
 Run from the root of the repository:
 
 ```bash
-docker buildx build --build-arg PYTHON_VERSION=3.14 -t ghcr.io/calagopus/oci-images:python3.14 python
+docker buildx build --build-arg PYTHON_VERSION=3.14 -t calagopus/oci-images:python3.14 python
 ```

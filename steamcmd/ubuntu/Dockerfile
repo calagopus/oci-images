@@ -1,4 +1,4 @@
-ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_ubuntu
+ARG         BASE_IMAGE=calagopus/oci-images:base_ubuntu
 
 FROM        --platform=$TARGETOS/$TARGETARCH ${BASE_IMAGE}
 

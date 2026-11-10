@@ -13,5 +13,5 @@ The official Bun image only exists for `amd64` and `arm64`.
 Run from the root of the repository:
 
 ```bash
-docker buildx build --build-arg BUN_VERSION=1 -t ghcr.io/calagopus/oci-images:bun1 bun
+docker buildx build --build-arg BUN_VERSION=1 -t calagopus/oci-images:bun1 bun
 ```

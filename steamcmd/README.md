@@ -39,5 +39,5 @@ In the Proton image, [`proton.sh`](./proton/entrypoint.d/proton.sh) also points 
 Run from the root of the repository:
 
 ```bash
-docker buildx build -f steamcmd/debian/Dockerfile -t ghcr.io/calagopus/oci-images:steamcmd_debian steamcmd
+docker buildx build -f steamcmd/debian/Dockerfile -t calagopus/oci-images:steamcmd_debian steamcmd
 ```

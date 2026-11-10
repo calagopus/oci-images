@@ -1,4 +1,4 @@
-ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_debian
+ARG         BASE_IMAGE=calagopus/oci-images:base_debian
 ARG         BUN_VERSION=1
 
 FROM        --platform=$TARGETOS/$TARGETARCH oven/bun:${BUN_VERSION} AS bun

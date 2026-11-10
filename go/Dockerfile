@@ -1,4 +1,4 @@
-ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_debian
+ARG         BASE_IMAGE=calagopus/oci-images:base_debian
 ARG         GO_VERSION=1.27
 
 FROM        --platform=$TARGETOS/$TARGETARCH golang:${GO_VERSION}-trixie AS go

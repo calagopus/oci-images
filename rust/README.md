@@ -13,5 +13,5 @@ The Rust toolchain, copied from the official image onto `base_debian`.
 Run from the root of the repository:
 
 ```bash
-docker buildx build --build-arg RUST_VERSION=1 -t ghcr.io/calagopus/oci-images:rust1 rust
+docker buildx build --build-arg RUST_VERSION=1 -t calagopus/oci-images:rust1 rust
 ```

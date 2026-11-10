@@ -37,5 +37,5 @@ steamcmd-install
 Run from the root of the repository:
 
 ```bash
-docker buildx build -f installers/debian/Dockerfile -t ghcr.io/calagopus/oci-images:installers_debian installers
+docker buildx build -f installers/debian/Dockerfile -t calagopus/oci-images:installers_debian installers
 ```

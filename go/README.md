@@ -18,5 +18,5 @@ Go 1.24 and 1.25 are end of life and get no security fixes.
 Run from the root of the repository:
 
 ```bash
-docker buildx build --build-arg GO_VERSION=1.27 -t ghcr.io/calagopus/oci-images:go1.27 go
+docker buildx build --build-arg GO_VERSION=1.27 -t calagopus/oci-images:go1.27 go
 ```

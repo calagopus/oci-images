@@ -33,5 +33,5 @@ Before the server starts, [`wine.sh`](./entrypoint.d/wine.sh) starts a virtual d
 Run from the root of the repository. `WINE_BRANCH` is `stable`, `staging`, `devel` or a stable version such as `10`:
 
 ```bash
-docker buildx build --build-arg WINE_BRANCH=stable -t ghcr.io/calagopus/oci-images:wine_stable wine
+docker buildx build --build-arg WINE_BRANCH=stable -t calagopus/oci-images:wine_stable wine
 ```

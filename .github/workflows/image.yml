@@ -81,7 +81,7 @@ jobs:
           load: true
           tags: ${{ env.IMAGE }}:${{ env.TAG }}
           build-args: |
-            ${{ inputs.base && format('BASE_IMAGE={0}:{1}', env.IMAGE, inputs.base) || '' }}
+            ${{ inputs.base && format('BASE_IMAGE={0}:{1}', env.DOCKERHUB_IMAGE, inputs.base) || '' }}
             ${{ inputs.build-args }}
 
       - name: Test image
@@ -110,7 +110,7 @@ jobs:
             ${{ env.IMAGE }}:${{ env.TAG }}
             ${{ env.DOCKERHUB_IMAGE }}:${{ env.TAG }}
           build-args: |
-            ${{ inputs.base && format('BASE_IMAGE={0}:{1}', env.IMAGE, inputs.base) || '' }}
+            ${{ inputs.base && format('BASE_IMAGE={0}:{1}', env.DOCKERHUB_IMAGE, inputs.base) || '' }}
             ${{ inputs.build-args }}
 
       - name: Login to Docker Hub
@@ -133,5 +133,5 @@ jobs:
             ${{ env.IMAGE }}:${{ env.TAG }}
             ${{ env.DOCKERHUB_IMAGE }}:${{ env.TAG }}
           build-args: |
-            ${{ inputs.base && format('BASE_IMAGE={0}:{1}', env.IMAGE, inputs.base) || '' }}
+            ${{ inputs.base && format('BASE_IMAGE={0}:{1}', env.DOCKERHUB_IMAGE, inputs.base) || '' }}
             ${{ inputs.build-args }}

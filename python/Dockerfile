@@ -1,4 +1,4 @@
-ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_debian
+ARG         BASE_IMAGE=calagopus/oci-images:base_debian
 ARG         PYTHON_VERSION=3.14
 
 FROM        --platform=$TARGETOS/$TARGETARCH python:${PYTHON_VERSION}-slim-trixie AS python

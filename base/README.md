@@ -15,5 +15,5 @@ On `riscv64`, Ubuntu 26.04 only runs on CPUs with the RVA23 profile. Debian and 
 Run from the root of the repository:
 
 ```bash
-docker buildx build -f base/debian/Dockerfile -t ghcr.io/calagopus/oci-images:base_debian base
+docker buildx build -f base/debian/Dockerfile -t calagopus/oci-images:base_debian base
 ```

@@ -41,8 +41,8 @@ Each directory has its own workflow in [`.github/workflows`](./.github/workflows
 To build an image yourself, start with its base image, from the root of the repository:
 
 ```bash
-docker buildx build -f base/debian/Dockerfile -t ghcr.io/calagopus/oci-images:base_debian base
-docker buildx build --build-arg JAVA_VERSION=21 -f java/temurin/Dockerfile -t ghcr.io/calagopus/oci-images:java21_temurin java
+docker buildx build -f base/debian/Dockerfile -t calagopus/oci-images:base_debian base
+docker buildx build --build-arg JAVA_VERSION=21 -f java/temurin/Dockerfile -t calagopus/oci-images:java21_temurin java
 ```
 
 ## Maintaining

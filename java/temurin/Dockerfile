@@ -1,4 +1,4 @@
-ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_debian
+ARG         BASE_IMAGE=calagopus/oci-images:base_debian
 ARG         JAVA_VERSION=25
 
 FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:${JAVA_VERSION}-jdk AS jdk

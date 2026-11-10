@@ -1,4 +1,4 @@
-ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_debian
+ARG         BASE_IMAGE=calagopus/oci-images:base_debian
 ARG         NODE_VERSION=24
 
 FROM        --platform=$TARGETOS/$TARGETARCH node:${NODE_VERSION}-slim AS node

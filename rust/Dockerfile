@@ -1,4 +1,4 @@
-ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:base_debian
+ARG         BASE_IMAGE=calagopus/oci-images:base_debian
 ARG         RUST_VERSION=1
 
 FROM        --platform=$TARGETOS/$TARGETARCH rust:${RUST_VERSION}-slim-trixie AS rust

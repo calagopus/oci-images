@@ -1,4 +1,4 @@
-ARG         BASE_IMAGE=ghcr.io/calagopus/oci-images:steamcmd_debian
+ARG         BASE_IMAGE=calagopus/oci-images:steamcmd_debian
 
 FROM        --platform=$TARGETOS/$TARGETARCH mcr.microsoft.com/dotnet/aspnet:8.0 AS dotnet8
 

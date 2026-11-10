@@ -23,5 +23,5 @@ Node.js 18, 19, 20, 21, 23 and 25 are end of life and get no security fixes.
 Run from the root of the repository:
 
 ```bash
-docker buildx build --build-arg NODE_VERSION=24 -t ghcr.io/calagopus/oci-images:nodejs24 nodejs
+docker buildx build --build-arg NODE_VERSION=24 -t calagopus/oci-images:nodejs24 nodejs
 ```
