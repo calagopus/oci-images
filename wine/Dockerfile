@@ -21,8 +21,15 @@ RUN         curl -fsSL -o /etc/apt/keyrings/winehq-archive.key https://dl.winehq
                 winbind \
                 xauth \
                 xvfb \
-            && DEBIAN_FRONTEND=noninteractive apt-get install -y --install-recommends \
-                winehq-${WINE_BRANCH} \
+            && case "${WINE_BRANCH}" in \
+                stable | staging | devel) \
+                    packages="winehq-${WINE_BRANCH}" ;; \
+                *) \
+                    version=$(apt-cache madison winehq-stable | awk '{ print $3 }' | grep "^${WINE_BRANCH}\." | sort -V | tail -n 1) \
+                    && test -n "${version}" \
+                    && packages="winehq-stable=${version} wine-stable=${version} wine-stable-amd64=${version} wine-stable-i386:i386=${version}" ;; \
+            esac \
+            && DEBIAN_FRONTEND=noninteractive apt-get install -y --install-recommends ${packages} \
             && rm -rf /var/lib/apt/lists/*
 
 # Install Winetricks

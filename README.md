@@ -28,7 +28,7 @@ Every image is a tag of `ghcr.io/calagopus/oci-images`, and is also pushed to Do
 | [`python`](./python) | `python<version>`, for example `python3.14` | All | Python 3.9 to 3.15 |
 | [`rust`](./rust) | `rust1` | All | Rust 1 |
 | [`steamcmd`](./steamcmd) | `steamcmd_debian`, `steamcmd_ubuntu`, `steamcmd_dotnet`, `steamcmd_proton`, `steamcmd_sniper` | `amd64` | For Steam game servers |
-| [`wine`](./wine) | `wine_stable`, `wine_staging`, `wine_devel` | `amd64` | For Windows game servers |
+| [`wine`](./wine) | `wine_stable`, `wine_staging`, `wine_devel`, `wine_<version>`, for example `wine_10` | `amd64` | Wine 8 to 11, for Windows game servers |
 
 "All" means `linux/amd64`, `linux/arm64`, `linux/ppc64le` and `linux/riscv64`.
 
