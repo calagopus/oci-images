@@ -1,1 +1,13 @@
 * text=auto eol=lf
+
+*.sh text eol=lf diff=bash
+installers/scripts/* text eol=lf diff=bash
+
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.md text eol=lf diff=markdown
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
