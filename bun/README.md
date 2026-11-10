@@ -3,8 +3,8 @@
 Bun, copied from the official image onto `base_debian`.
 
 | Tag | Built from | Image | `amd64` | `arm64` | `ppc64le` | `riscv64` |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `bun1` | `oven/bun:1` | `ghcr.io/calagopus/oci-images:bun1` | Yes | Yes | No | No |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| `bun1` | `oven/bun:1` | `ghcr.io/calagopus/oci-images:bun1`, `calagopus/oci-images:bun1` | ✅ | ✅ | ❌ | ❌ |
 
 The official Bun image only exists for `amd64` and `arm64`.
 

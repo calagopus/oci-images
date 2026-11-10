@@ -3,12 +3,12 @@
 For game servers that are installed and updated through SteamCMD.
 
 | Tag | Built on | Image | `amd64` | `arm64` | `ppc64le` | `riscv64` |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `steamcmd_debian` | `base_debian` | `ghcr.io/calagopus/oci-images:steamcmd_debian` | Yes | No | No | No |
-| `steamcmd_ubuntu` | `base_ubuntu` | `ghcr.io/calagopus/oci-images:steamcmd_ubuntu` | Yes | No | No | No |
-| `steamcmd_dotnet` | `steamcmd_debian` | `ghcr.io/calagopus/oci-images:steamcmd_dotnet` | Yes | No | No | No |
-| `steamcmd_proton` | `steamcmd_debian` | `ghcr.io/calagopus/oci-images:steamcmd_proton` | Yes | No | No | No |
-| `steamcmd_sniper` | `registry.gitlab.steamos.cloud/steamrt/sniper/platform` | `ghcr.io/calagopus/oci-images:steamcmd_sniper` | Yes | No | No | No |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| `steamcmd_debian` | `base_debian` | `ghcr.io/calagopus/oci-images:steamcmd_debian`, `calagopus/oci-images:steamcmd_debian` | ✅ | ❌ | ❌ | ❌ |
+| `steamcmd_ubuntu` | `base_ubuntu` | `ghcr.io/calagopus/oci-images:steamcmd_ubuntu`, `calagopus/oci-images:steamcmd_ubuntu` | ✅ | ❌ | ❌ | ❌ |
+| `steamcmd_dotnet` | `steamcmd_debian` | `ghcr.io/calagopus/oci-images:steamcmd_dotnet`, `calagopus/oci-images:steamcmd_dotnet` | ✅ | ❌ | ❌ | ❌ |
+| `steamcmd_proton` | `steamcmd_debian` | `ghcr.io/calagopus/oci-images:steamcmd_proton`, `calagopus/oci-images:steamcmd_proton` | ✅ | ❌ | ❌ | ❌ |
+| `steamcmd_sniper` | `registry.gitlab.steamos.cloud/steamrt/sniper/platform` | `ghcr.io/calagopus/oci-images:steamcmd_sniper`, `calagopus/oci-images:steamcmd_sniper` | ✅ | ❌ | ❌ | ❌ |
 
 SteamCMD is a 32-bit x86 program, so there are only `amd64` images.
 

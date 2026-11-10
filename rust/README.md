@@ -3,8 +3,8 @@
 The Rust toolchain, copied from the official image onto `base_debian`.
 
 | Tag | Built from | Image | `amd64` | `arm64` | `ppc64le` | `riscv64` |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `rust1` | `rust:1-slim-trixie` | `ghcr.io/calagopus/oci-images:rust1` | Yes | Yes | Yes | Yes |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| `rust1` | `rust:1-slim-trixie` | `ghcr.io/calagopus/oci-images:rust1`, `calagopus/oci-images:rust1` | ✅ | ✅ | ✅ | ✅ |
 
 `CARGO_HOME` is `/home/container/.cargo`, so downloaded crates and installed tools stay with the server.
 

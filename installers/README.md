@@ -3,10 +3,10 @@
 The images that server installation scripts run in. They run as `root`, have no entrypoint and add `file`, `jq`, `unzip`, `wget` and `zip` to their base image.
 
 | Tag | Built on | Image | `steamcmd-install` | `amd64` | `arm64` | `ppc64le` | `riscv64` |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `installers_alpine` | `base_alpine` | `ghcr.io/calagopus/oci-images:installers_alpine` | No | Yes | Yes | Yes | Yes |
-| `installers_debian` | `base_debian` | `ghcr.io/calagopus/oci-images:installers_debian` | Yes | Yes | Yes | Yes | Yes |
-| `installers_ubuntu` | `base_ubuntu` | `ghcr.io/calagopus/oci-images:installers_ubuntu` | Yes | Yes | Yes | Yes | Yes |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| `installers_alpine` | `base_alpine` | `ghcr.io/calagopus/oci-images:installers_alpine`, `calagopus/oci-images:installers_alpine` | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `installers_debian` | `base_debian` | `ghcr.io/calagopus/oci-images:installers_debian`, `calagopus/oci-images:installers_debian` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `installers_ubuntu` | `base_ubuntu` | `ghcr.io/calagopus/oci-images:installers_ubuntu`, `calagopus/oci-images:installers_ubuntu` | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 On `amd64`, the Debian and Ubuntu installers also have `lib32gcc-s1`, which SteamCMD needs.
 

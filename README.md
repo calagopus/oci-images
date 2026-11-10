@@ -15,22 +15,22 @@ The images are built for the Calagopus project.
 
 ## Images
 
-Every image is a tag of `ghcr.io/calagopus/oci-images`, and is also pushed to Docker Hub as `docker.io/calagopus/oci-images`. Each directory has a README with all its tags and platforms.
+Every image is a tag of `ghcr.io/calagopus/oci-images`, and is also pushed to Docker Hub as `calagopus/oci-images`. Each directory has a README with all its tags and platforms.
 
-| Directory | Tags | Platforms | Contents |
-| :--- | :--- | :--- | :--- |
-| [`base`](./base) | `base_alpine`, `base_debian`, `base_ubuntu` | All | Plain OS images with the shared packages, the `container` user and the entrypoint |
-| [`installers`](./installers) | `installers_alpine`, `installers_debian`, `installers_ubuntu` | All | For server installation scripts, run as root |
-| [`bun`](./bun) | `bun1` | `amd64`, `arm64` | Bun 1 |
-| [`go`](./go) | `go<version>`, for example `go1.27` | All | Go 1.24 to 1.27 |
-| [`java`](./java) | `java<version>_<vendor>`, for example `java21_temurin` | Depends on the vendor | Java 8, 11, 17, 21, 25, 26 and 27 |
-| [`nodejs`](./nodejs) | `nodejs<version>`, for example `nodejs24` | `amd64`, `arm64`, `ppc64le` | Node.js 18 to 26 |
-| [`python`](./python) | `python<version>`, for example `python3.14` | All | Python 3.9 to 3.15 |
-| [`rust`](./rust) | `rust1` | All | Rust 1 |
-| [`steamcmd`](./steamcmd) | `steamcmd_debian`, `steamcmd_ubuntu`, `steamcmd_dotnet`, `steamcmd_proton`, `steamcmd_sniper` | `amd64` | For Steam game servers |
-| [`wine`](./wine) | `wine_stable`, `wine_staging`, `wine_devel`, `wine_<version>`, for example `wine_10` | `amd64` | Wine 8 to 11, for Windows game servers |
+| Directory | Tags | `amd64` | `arm64` | `ppc64le` | `riscv64` | Contents |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| [`base`](./base) | `base_alpine`, `base_debian`, `base_ubuntu` | ✅ | ✅ | ✅ | ✅ | Plain OS images with the shared packages, the `container` user and the entrypoint |
+| [`installers`](./installers) | `installers_alpine`, `installers_debian`, `installers_ubuntu` | ✅ | ✅ | ✅ | ✅ | For server installation scripts, run as root |
+| [`bun`](./bun) | `bun1` | ✅ | ✅ | ❌ | ❌ | Bun 1 |
+| [`go`](./go) | `go<version>`, for example `go1.27` | ✅ | ✅ | ✅ | ✅ | Go 1.24 to 1.27 |
+| [`java`](./java) | `java<version>_<vendor>`, for example `java21_temurin` | ✅ | ✅ | 🟡 | 🟡 | Java 8, 11, 17, 21, 25, 26 and 27 |
+| [`nodejs`](./nodejs) | `nodejs<version>`, for example `nodejs24` | ✅ | ✅ | ✅ | ❌ | Node.js 18 to 26 |
+| [`python`](./python) | `python<version>`, for example `python3.14` | ✅ | ✅ | ✅ | ✅ | Python 3.9 to 3.15 |
+| [`rust`](./rust) | `rust1` | ✅ | ✅ | ✅ | ✅ | Rust 1 |
+| [`steamcmd`](./steamcmd) | `steamcmd_debian`, `steamcmd_ubuntu`, `steamcmd_dotnet`, `steamcmd_proton`, `steamcmd_sniper` | ✅ | ❌ | ❌ | ❌ | For Steam game servers |
+| [`wine`](./wine) | `wine_stable`, `wine_staging`, `wine_devel`, `wine_<version>`, for example `wine_10` | ✅ | ❌ | ❌ | ❌ | Wine 8 to 11, for Windows game servers |
 
-"All" means `linux/amd64`, `linux/arm64`, `linux/ppc64le` and `linux/riscv64`.
+🟡 means only some tags have that platform. The README of the directory lists which.
 
 ## How it works
 
