@@ -14,8 +14,9 @@ LABEL       org.opencontainers.image.description="PHP ${PHP_VERSION} image."
 
 USER        root
 
-# Copy PHP runtime and Composer from official images
+# Copy PHP runtime, source archive, and Composer from official images
 COPY        --from=php /usr/local /usr/local
+COPY        --from=php /usr/src /usr/src
 COPY        --from=composer /usr/bin/composer /usr/local/bin/composer
 
 # Install runtime libraries and common PHP extensions
@@ -45,7 +46,7 @@ RUN         apt-get update \
                 sockets \
                 zip \
             && rm -f /usr/local/bin/install-php-extensions \
-            && rm -rf /var/lib/apt/lists/* \
+            && rm -rf /usr/src/php* /var/lib/apt/lists/* \
             && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
 ENV         COMPOSER_HOME=/home/container/.composer
