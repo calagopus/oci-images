@@ -1,6 +1,6 @@
 # PHP images
 
-PHP (CLI and FPM), Composer and Nginx, copied from the official images onto `base_debian` with common extensions pre-installed (`bcmath`, `exif`, `gd`, `gmp`, `intl`, `mysqli`, `opcache`, `pcntl`, `pdo_mysql`, `pdo_pgsql`, `redis`, `sockets`, `zip`).
+PHP and Composer, copied from the official images onto `base_debian` with common extensions pre-installed (`bcmath`, `exif`, `gd`, `gmp`, `intl`, `mysqli`, `opcache`, `pcntl`, `pdo_mysql`, `pdo_pgsql`, `redis`, `sockets`, `zip`).
 
 | Tag | Built from | Image | `amd64` | `arm64` | `ppc64le` | `riscv64` |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
