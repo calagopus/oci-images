@@ -18,7 +18,7 @@ USER        root
 COPY        --from=php /usr/local /usr/local
 COPY        --from=composer /usr/bin/composer /usr/local/bin/composer
 
-# Install runtime libraries, Nginx, and common PHP extensions
+# Install runtime libraries and common PHP extensions
 ADD         --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 RUN         apt-get update \
             && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -29,7 +29,6 @@ RUN         apt-get update \
                 libsodium23 \
                 libxml2 \
                 libzip5 \
-                nginx \
                 unzip \
             && install-php-extensions \
                 bcmath \
@@ -47,9 +46,7 @@ RUN         apt-get update \
                 zip \
             && rm -f /usr/local/bin/install-php-extensions \
             && rm -rf /var/lib/apt/lists/* \
-            && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
-            && mkdir -p /var/lib/nginx /var/log/nginx /run/nginx \
-            && chown -R container:container /var/lib/nginx /var/log/nginx /run/nginx
+            && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
 
 ENV         COMPOSER_HOME=/home/container/.composer
 ENV         PATH="${COMPOSER_HOME}/vendor/bin:${PATH}"
