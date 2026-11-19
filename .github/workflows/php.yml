@@ -1,0 +1,27 @@
+name: php
+
+on:
+  workflow_call:
+
+jobs:
+  php:
+    name: "php${{ matrix.version }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        version:
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4"
+          - "8.5"
+    uses: ./.github/workflows/image.yml
+    secrets: inherit
+    with:
+      tag: php${{ matrix.version }}
+      base: base_debian
+      context: ./php
+      build-args: PHP_VERSION=${{ matrix.version }}
+      platforms: linux/amd64,linux/arm64,linux/ppc64le
+      test: composer --version
