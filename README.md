@@ -25,6 +25,7 @@ Every image is a tag of `ghcr.io/calagopus/oci-images`, and is also pushed to Do
 | [`go`](./go) | `go<version>`, for example `go1.27` | ✅ | ✅ | ✅ | ✅ | Go 1.24 to 1.27 |
 | [`java`](./java) | `java<version>_<vendor>`, for example `java21_temurin` | ✅ | ✅ | 🟡 | 🟡 | Java 8, 11, 17, 21, 25, 26 and 27 |
 | [`nodejs`](./nodejs) | `nodejs<version>`, for example `nodejs24` | ✅ | ✅ | ✅ | ❌ | Node.js 18 to 26 |
+| [`php`](./php) | `php<version>`, for example `php8.5` | ✅ | ✅ | ✅ | 🟡 | PHP 8.1 to 8.5 with Composer |
 | [`python`](./python) | `python<version>`, for example `python3.14` | ✅ | ✅ | ✅ | ✅ | Python 3.9 to 3.15 |
 | [`rust`](./rust) | `rust1` | ✅ | ✅ | ✅ | ✅ | Rust 1 |
 | [`steamcmd`](./steamcmd) | `steamcmd_debian`, `steamcmd_ubuntu`, `steamcmd_dotnet`, `steamcmd_proton`, `steamcmd_sniper` | ✅ | ❌ | ❌ | ❌ | For Steam game servers |

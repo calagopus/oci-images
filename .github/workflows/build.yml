@@ -15,6 +15,7 @@ on:
       - installers/**
       - java/**
       - nodejs/**
+      - php/**
       - python/**
       - rust/**
       - steamcmd/**
@@ -29,6 +30,7 @@ on:
       - installers/**
       - java/**
       - nodejs/**
+      - php/**
       - python/**
       - rust/**
       - steamcmd/**
@@ -55,6 +57,7 @@ jobs:
       go: ${{ steps.changes.outputs.go }}
       java: ${{ steps.changes.outputs.java }}
       nodejs: ${{ steps.changes.outputs.nodejs }}
+      php: ${{ steps.changes.outputs.php }}
       python: ${{ steps.changes.outputs.python }}
       rust: ${{ steps.changes.outputs.rust }}
       steamcmd: ${{ steps.changes.outputs.steamcmd }}
@@ -80,7 +83,7 @@ jobs:
             all=false
             changed=$(git diff --name-only "origin/${BASE_REF}...HEAD" -- . ':!*.md')
           fi
-          for image in base installers bun go java nodejs python rust steamcmd wine; do
+          for image in base installers bun go java nodejs php python rust steamcmd wine; do
             if [ "$all" = "true" ] || grep -q -e "^${image}/" -e "^\.github/workflows/" <<< "$changed"; then
               echo "${image}=true" >> "$GITHUB_OUTPUT"
             else
@@ -144,12 +147,22 @@ jobs:
     uses: ./.github/workflows/nodejs.yml
     secrets: inherit
 
+  php:
+    name: php
+    needs:
+      - changes
+      - base
+      - nodejs
+    if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.php == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/php.yml
+    secrets: inherit
+
   python:
     name: python
     needs:
       - changes
       - base
-      - nodejs
+      - php
     if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.python == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/python.yml
     secrets: inherit
