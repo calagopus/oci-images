@@ -23,5 +23,8 @@ jobs:
       base: base_debian
       context: ./php
       build-args: PHP_VERSION=${{ matrix.version }}
-      platforms: linux/amd64,linux/arm64,linux/ppc64le
-      test: composer --version
+      test: |
+        for extension in bcmath exif gd gmp intl mysqli pcntl pdo_mysql pdo_pgsql redis sockets zip "Zend OPcache"; do
+          php -m | grep -qx "$extension" || { echo "missing $extension"; exit 1; }
+        done
+        composer --version
