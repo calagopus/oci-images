@@ -22,6 +22,7 @@ Every image is a tag of `ghcr.io/calagopus/oci-images`, and is also pushed to Do
 | [`base`](./base) | `base_alpine`, `base_debian`, `base_ubuntu` | ✅ | ✅ | ✅ | ✅ | Plain OS images with the shared packages, the `container` user and the entrypoint |
 | [`installers`](./installers) | `installers_alpine`, `installers_debian`, `installers_ubuntu` | ✅ | ✅ | ✅ | ✅ | For server installation scripts, run as root |
 | [`bun`](./bun) | `bun1` | ✅ | ✅ | ❌ | ❌ | Bun 1 |
+| [`dotnet`](./dotnet) | `dotnet<version>`, for example `dotnet10` | ✅ | ✅ | ❌ | ❌ | .NET 7 to 10 |
 | [`go`](./go) | `go<version>`, for example `go1.27` | ✅ | ✅ | ✅ | ✅ | Go 1.24 to 1.27 |
 | [`java`](./java) | `java<version>_<vendor>`, for example `java21_temurin` | ✅ | ✅ | 🟡 | 🟡 | Java 8, 11, 17, 21, 25, 26 and 27 |
 | [`nodejs`](./nodejs) | `nodejs<version>`, for example `nodejs24` | ✅ | ✅ | ✅ | ❌ | Node.js 18 to 26 |
