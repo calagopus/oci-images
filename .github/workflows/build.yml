@@ -11,6 +11,7 @@ on:
       - .github/workflows/**
       - base/**
       - bun/**
+      - dotnet/**
       - go/**
       - installers/**
       - java/**
@@ -26,6 +27,7 @@ on:
       - .github/workflows/**
       - base/**
       - bun/**
+      - dotnet/**
       - go/**
       - installers/**
       - java/**
@@ -54,6 +56,7 @@ jobs:
       base: ${{ steps.changes.outputs.base }}
       installers: ${{ steps.changes.outputs.installers }}
       bun: ${{ steps.changes.outputs.bun }}
+      dotnet: ${{ steps.changes.outputs.dotnet }}
       go: ${{ steps.changes.outputs.go }}
       java: ${{ steps.changes.outputs.java }}
       nodejs: ${{ steps.changes.outputs.nodejs }}
@@ -83,7 +86,7 @@ jobs:
             all=false
             changed=$(git diff --name-only "origin/${BASE_REF}...HEAD" -- . ':!*.md')
           fi
-          for image in base installers bun go java nodejs php python rust steamcmd wine; do
+          for image in base installers bun dotnet go java nodejs php python rust steamcmd wine; do
             if [ "$all" = "true" ] || grep -q -e "^${image}/" -e "^\.github/workflows/" <<< "$changed"; then
               echo "${image}=true" >> "$GITHUB_OUTPUT"
             else
@@ -117,12 +120,22 @@ jobs:
     uses: ./.github/workflows/bun.yml
     secrets: inherit
 
+  dotnet:
+    name: dotnet
+    needs:
+      - changes
+      - base
+      - bun
+    if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.dotnet == 'true' || needs.changes.outputs.base == 'true') }}
+    uses: ./.github/workflows/dotnet.yml
+    secrets: inherit
+
   go:
     name: go
     needs:
       - changes
       - base
-      - bun
+      - dotnet
     if: ${{ !cancelled() && needs.base.result != 'failure' && (needs.changes.outputs.go == 'true' || needs.changes.outputs.base == 'true') }}
     uses: ./.github/workflows/go.yml
     secrets: inherit
