@@ -1,4 +1,4 @@
-name: installers
+name: Installers
 
 on:
   workflow_call:
@@ -6,20 +6,27 @@ on:
 jobs:
   installers:
     name: "installers_${{ matrix.installer }}"
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
-      max-parallel: 2
       matrix:
         installer:
           - alpine
           - debian
           - ubuntu
-    uses: ./.github/workflows/image.yml
-    secrets: inherit
-    with:
-      tag: installers_${{ matrix.installer }}
-      base: base_${{ matrix.installer }}
-      context: ./installers
-      file: ./installers/${{ matrix.installer }}/Dockerfile
-      entrypoint: false
-      test: 'test "$(id -u)" = 0 && jq --version'
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: ${{ github.event_name == 'pull_request' && 'Build and test image' || 'Build, test and push image' }}
+        uses: ./.github/actions/build-image
+        with:
+          tag: installers_${{ matrix.installer }}
+          base: base_${{ matrix.installer }}
+          context: ./installers
+          file: ./installers/${{ matrix.installer }}/Dockerfile
+          entrypoint: false
+          test: 'test "$(id -u)" = 0 && jq --version'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-oidc-connection-id: ${{ secrets.DOCKERHUB_OIDC_CONNECTIONID }}

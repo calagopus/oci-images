@@ -1,4 +1,4 @@
-name: steamcmd
+name: SteamCMD
 
 on:
   workflow_call:
@@ -6,19 +6,26 @@ on:
 jobs:
   steamcmd:
     name: "steamcmd_${{ matrix.steamcmd }}"
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
-      max-parallel: 2
       matrix:
         steamcmd:
           - debian
           - ubuntu
-    uses: ./.github/workflows/image.yml
-    secrets: inherit
-    with:
-      tag: steamcmd_${{ matrix.steamcmd }}
-      base: base_${{ matrix.steamcmd }}
-      context: ./steamcmd
-      file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
-      platforms: linux/amd64
-      test: test -e /lib/ld-linux.so.2
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: ${{ github.event_name == 'pull_request' && 'Build and test image' || 'Build, test and push image' }}
+        uses: ./.github/actions/build-image
+        with:
+          tag: steamcmd_${{ matrix.steamcmd }}
+          base: base_${{ matrix.steamcmd }}
+          context: ./steamcmd
+          file: ./steamcmd/${{ matrix.steamcmd }}/Dockerfile
+          platforms: linux/amd64
+          test: test -e /lib/ld-linux.so.2
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-oidc-connection-id: ${{ secrets.DOCKERHUB_OIDC_CONNECTIONID }}

@@ -1,4 +1,4 @@
-name: nodejs
+name: Node.js
 
 on:
   workflow_call:
@@ -6,6 +6,7 @@ on:
 jobs:
   nodejs:
     name: "nodejs${{ matrix.version }}"
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -20,12 +21,19 @@ jobs:
           - 24
           - 25
           - 26
-    uses: ./.github/workflows/image.yml
-    secrets: inherit
-    with:
-      tag: nodejs${{ matrix.version }}
-      base: base_debian
-      context: ./nodejs
-      build-args: NODE_VERSION=${{ matrix.version }}
-      platforms: linux/amd64,linux/arm64,linux/ppc64le
-      test: npm --version
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: ${{ github.event_name == 'pull_request' && 'Build and test image' || 'Build, test and push image' }}
+        uses: ./.github/actions/build-image
+        with:
+          tag: nodejs${{ matrix.version }}
+          base: base_debian
+          context: ./nodejs
+          build-args: NODE_VERSION=${{ matrix.version }}
+          platforms: linux/amd64,linux/arm64,linux/ppc64le
+          test: npm --version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-oidc-connection-id: ${{ secrets.DOCKERHUB_OIDC_CONNECTIONID }}

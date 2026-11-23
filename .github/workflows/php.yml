@@ -1,4 +1,4 @@
-name: php
+name: PHP
 
 on:
   workflow_call:
@@ -6,6 +6,7 @@ on:
 jobs:
   php:
     name: "php${{ matrix.version }}"
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -16,19 +17,26 @@ jobs:
           - "8.3"
           - "8.4"
           - "8.5"
-    uses: ./.github/workflows/image.yml
-    secrets: inherit
-    with:
-      tag: php${{ matrix.version }}
-      base: base_debian
-      context: ./php
-      build-args: PHP_VERSION=${{ matrix.version }}
-      platforms: >-
-        ${{ matrix.version == '8.3'
-        && 'linux/amd64,linux/arm64,linux/ppc64le'
-        || 'linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64' }}
-      test: |
-        for extension in bcmath exif gd gmp intl mysqli pcntl pdo_mysql pdo_pgsql redis sockets zip "Zend OPcache"; do
-          php -m | grep -qx "$extension" || { echo "missing $extension"; exit 1; }
-        done
-        composer --version
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: ${{ github.event_name == 'pull_request' && 'Build and test image' || 'Build, test and push image' }}
+        uses: ./.github/actions/build-image
+        with:
+          tag: php${{ matrix.version }}
+          base: base_debian
+          context: ./php
+          build-args: PHP_VERSION=${{ matrix.version }}
+          platforms: >-
+            ${{ matrix.version == '8.3'
+            && 'linux/amd64,linux/arm64,linux/ppc64le'
+            || 'linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64' }}
+          test: |
+            for extension in bcmath exif gd gmp intl mysqli pcntl pdo_mysql pdo_pgsql redis sockets zip "Zend OPcache"; do
+              php -m | grep -qx "$extension" || { echo "missing $extension"; exit 1; }
+            done
+            composer --version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-oidc-connection-id: ${{ secrets.DOCKERHUB_OIDC_CONNECTIONID }}

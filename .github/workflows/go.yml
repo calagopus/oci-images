@@ -1,4 +1,4 @@
-name: go
+name: Go
 
 on:
   workflow_call:
@@ -6,6 +6,7 @@ on:
 jobs:
   go:
     name: "go${{ matrix.version }}"
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -15,11 +16,18 @@ jobs:
           - "1.25"
           - "1.26"
           - "1.27"
-    uses: ./.github/workflows/image.yml
-    secrets: inherit
-    with:
-      tag: go${{ matrix.version }}
-      base: base_debian
-      context: ./go
-      build-args: GO_VERSION=${{ matrix.version }}
-      test: go version
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: ${{ github.event_name == 'pull_request' && 'Build and test image' || 'Build, test and push image' }}
+        uses: ./.github/actions/build-image
+        with:
+          tag: go${{ matrix.version }}
+          base: base_debian
+          context: ./go
+          build-args: GO_VERSION=${{ matrix.version }}
+          test: go version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-oidc-connection-id: ${{ secrets.DOCKERHUB_OIDC_CONNECTIONID }}

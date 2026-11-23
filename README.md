@@ -38,7 +38,7 @@ Every image is a tag of `ghcr.io/calagopus/oci-images`, and is also pushed to Do
 
 The base images hold the shared packages, the `container` user, `dumb-init` and the entrypoint. The runtime images copy their runtime from the official upstream image onto `base_debian`, and the installer, SteamCMD and Wine images add their packages on top. `steamcmd_sniper` is Valve's Steam Runtime 3 with the same entrypoint. When a server starts, the entrypoint runs the scripts in `/entrypoint.d/` and then `STARTUP`.
 
-Each directory has its own workflow in [`.github/workflows`](./.github/workflows) with its versions. [`build.yml`](./.github/workflows/build.yml) builds them one after another, two jobs at a time, and only what changed. The scheduled run every Monday builds everything.
+The images are rebuilt every Monday, and whenever they or the image they are built on change.
 
 To build an image yourself, start with its base image, from the root of the repository:
 
@@ -54,6 +54,7 @@ docker buildx build --build-arg JAVA_VERSION=21 -f java/temurin/Dockerfile -t ca
 | Add or remove a package | The Dockerfile of the base image |
 | Add or remove a version | The `matrix` in the workflow of the directory, and the table in its README |
 | Change how servers are started | `base/entrypoint.sh` |
+| Change how images are built, tested or pushed | `.github/actions/build-image/action.yml` |
 | Add a runtime | A new directory with a Dockerfile, an `entrypoint.d` script, a README and a workflow, plus a job, a `paths` entry and a `changes` entry for it in `build.yml` |
 
 Every `FROM` line uses `--platform=$TARGETOS/$TARGETARCH`, except the download stage of `java/shenandoah`.
