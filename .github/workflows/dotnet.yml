@@ -1,0 +1,27 @@
+name: dotnet
+
+on:
+  workflow_call:
+
+jobs:
+  dotnet:
+    name: "dotnet${{ matrix.version }}"
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        version:
+          - "7"
+          - "8"
+          - "9"
+          - "10"
+          - "11"
+    uses: ./.github/workflows/image.yml
+    secrets: inherit
+    with:
+      tag: dotnet${{ matrix.version }}
+      base: base_debian
+      context: ./dotnet
+      build-args: DOTNET_VERSION=${{ matrix.version }}
+      platforms: linux/amd64,linux/arm64
+      test: dotnet new console -o /tmp/app && dotnet run --project /tmp/app

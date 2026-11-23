@@ -22,14 +22,15 @@ Every image is a tag of `ghcr.io/calagopus/oci-images`, and is also pushed to Do
 | [`base`](./base) | `base_alpine`, `base_debian`, `base_ubuntu` | ✅ | ✅ | ✅ | ✅ | Plain OS images with the shared packages, the `container` user and the entrypoint |
 | [`installers`](./installers) | `installers_alpine`, `installers_debian`, `installers_ubuntu` | ✅ | ✅ | ✅ | ✅ | For server installation scripts, run as root |
 | [`bun`](./bun) | `bun1` | ✅ | ✅ | ❌ | ❌ | Bun 1 |
-| [`go`](./go) | `go<version>`, for example `go1.27` | ✅ | ✅ | ✅ | ✅ | Go 1.24 to 1.27 |
-| [`java`](./java) | `java<version>_<vendor>`, for example `java21_temurin` | ✅ | ✅ | 🟡 | 🟡 | Java 8, 11, 17, 21, 25, 26 and 27 |
-| [`nodejs`](./nodejs) | `nodejs<version>`, for example `nodejs24` | ✅ | ✅ | ✅ | ❌ | Node.js 18 to 26 |
-| [`php`](./php) | `php<version>`, for example `php8.5` | ✅ | ✅ | ✅ | 🟡 | PHP 8.1 to 8.5 with Composer |
-| [`python`](./python) | `python<version>`, for example `python3.14` | ✅ | ✅ | ✅ | ✅ | Python 3.9 to 3.15 |
+| [`dotnet`](./dotnet) | `dotnet<version>` | ✅ | ✅ | ❌ | ❌ | .NET 7 to 11 |
+| [`go`](./go) | `go<version>` | ✅ | ✅ | ✅ | ✅ | Go 1.24 to 1.27 |
+| [`java`](./java) | `java<version>_<vendor>` | ✅ | ✅ | 🟡 | 🟡 | Java 8, 11, 17, 21, 25, 26 and 27 |
+| [`nodejs`](./nodejs) | `nodejs<version>` | ✅ | ✅ | ✅ | ❌ | Node.js 18 to 26 |
+| [`php`](./php) | `php<version>` | ✅ | ✅ | ✅ | 🟡 | PHP 8.1 to 8.5 with Composer |
+| [`python`](./python) | `python<version>` | ✅ | ✅ | ✅ | ✅ | Python 3.9 to 3.15 |
 | [`rust`](./rust) | `rust1` | ✅ | ✅ | ✅ | ✅ | Rust 1 |
 | [`steamcmd`](./steamcmd) | `steamcmd_debian`, `steamcmd_ubuntu`, `steamcmd_dotnet`, `steamcmd_proton`, `steamcmd_sniper` | ✅ | ❌ | ❌ | ❌ | For Steam game servers |
-| [`wine`](./wine) | `wine_stable`, `wine_staging`, `wine_devel`, `wine_<version>`, for example `wine_10` | ✅ | ❌ | ❌ | ❌ | Wine 8 to 11, for Windows game servers |
+| [`wine`](./wine) | `wine_stable`, `wine_staging`, `wine_devel`, `wine_<version>` | ✅ | ❌ | ❌ | ❌ | Wine 8 to 11, for Windows game servers |
 
 🟡 means only some tags have that platform. The README of the directory lists which.
 
