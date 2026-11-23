@@ -1,4 +1,4 @@
-name: python
+name: Python
 
 on:
   workflow_call:
@@ -6,6 +6,7 @@ on:
 jobs:
   python:
     name: "python${{ matrix.version }}"
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -18,11 +19,18 @@ jobs:
           - "3.13"
           - "3.14"
           - "3.15"
-    uses: ./.github/workflows/image.yml
-    secrets: inherit
-    with:
-      tag: python${{ matrix.version }}
-      base: base_debian
-      context: ./python
-      build-args: PYTHON_VERSION=${{ matrix.version }}
-      test: pip --version
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: ${{ github.event_name == 'pull_request' && 'Build and test image' || 'Build, test and push image' }}
+        uses: ./.github/actions/build-image
+        with:
+          tag: python${{ matrix.version }}
+          base: base_debian
+          context: ./python
+          build-args: PYTHON_VERSION=${{ matrix.version }}
+          test: pip --version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-oidc-connection-id: ${{ secrets.DOCKERHUB_OIDC_CONNECTIONID }}

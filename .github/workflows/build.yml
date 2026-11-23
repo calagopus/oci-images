@@ -1,4 +1,4 @@
-name: build
+name: Build Images
 
 on:
   workflow_dispatch:
@@ -8,6 +8,7 @@ on:
     branches:
       - main
     paths:
+      - .github/actions/**
       - .github/workflows/**
       - base/**
       - bun/**
@@ -24,6 +25,7 @@ on:
       - "!**/*.md"
   pull_request:
     paths:
+      - .github/actions/**
       - .github/workflows/**
       - base/**
       - bun/**
@@ -50,8 +52,10 @@ concurrency:
 
 jobs:
   changes:
-    name: changes
-    runs-on: ubuntu-latest
+    name: Detect Changes
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     outputs:
       base: ${{ steps.changes.outputs.base }}
       installers: ${{ steps.changes.outputs.installers }}
@@ -66,12 +70,12 @@ jobs:
       steamcmd: ${{ steps.changes.outputs.steamcmd }}
       wine: ${{ steps.changes.outputs.wine }}
     steps:
-      - name: Git checkout for Github repository workspace
+      - name: Checkout sources
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - name: Find the images to build
+      - name: Detect changed images
         id: changes
         env:
           EVENT: ${{ github.event_name }}
@@ -87,7 +91,7 @@ jobs:
             changed=$(git diff --name-only "origin/${BASE_REF}...HEAD" -- . ':!*.md')
           fi
           for image in base installers bun dotnet go java nodejs php python rust steamcmd wine; do
-            if [ "$all" = "true" ] || grep -q -e "^${image}/" -e "^\.github/workflows/" <<< "$changed"; then
+            if [ "$all" = "true" ] || grep -q -e "^${image}/" -e "^\.github/actions/" -e "^\.github/workflows/" <<< "$changed"; then
               echo "${image}=true" >> "$GITHUB_OUTPUT"
             else
               echo "${image}=false" >> "$GITHUB_OUTPUT"
@@ -95,14 +99,14 @@ jobs:
           done
 
   base:
-    name: base
+    name: Base
     needs: changes
     if: needs.changes.outputs.base == 'true'
     uses: ./.github/workflows/base.yml
     secrets: inherit
 
   installers:
-    name: installers
+    name: Installers
     needs:
       - changes
       - base
@@ -111,7 +115,7 @@ jobs:
     secrets: inherit
 
   bun:
-    name: bun
+    name: Bun
     needs:
       - changes
       - base
@@ -121,7 +125,7 @@ jobs:
     secrets: inherit
 
   dotnet:
-    name: dotnet
+    name: .NET
     needs:
       - changes
       - base
@@ -131,7 +135,7 @@ jobs:
     secrets: inherit
 
   go:
-    name: go
+    name: Go
     needs:
       - changes
       - base
@@ -141,7 +145,7 @@ jobs:
     secrets: inherit
 
   java:
-    name: java
+    name: Java
     needs:
       - changes
       - base
@@ -151,7 +155,7 @@ jobs:
     secrets: inherit
 
   nodejs:
-    name: nodejs
+    name: Node.js
     needs:
       - changes
       - base
@@ -161,7 +165,7 @@ jobs:
     secrets: inherit
 
   php:
-    name: php
+    name: PHP
     needs:
       - changes
       - base
@@ -171,7 +175,7 @@ jobs:
     secrets: inherit
 
   python:
-    name: python
+    name: Python
     needs:
       - changes
       - base
@@ -181,7 +185,7 @@ jobs:
     secrets: inherit
 
   rust:
-    name: rust
+    name: Rust
     needs:
       - changes
       - base
@@ -191,7 +195,7 @@ jobs:
     secrets: inherit
 
   steamcmd:
-    name: steamcmd
+    name: SteamCMD
     needs:
       - changes
       - base
@@ -201,7 +205,7 @@ jobs:
     secrets: inherit
 
   steamcmd-runtimes:
-    name: steamcmd-runtimes
+    name: SteamCMD Runtimes
     needs:
       - changes
       - base
@@ -211,7 +215,7 @@ jobs:
     secrets: inherit
 
   wine:
-    name: wine
+    name: Wine
     needs:
       - changes
       - base
