@@ -10,8 +10,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:
-          - "2"
+        include:
+          - version: "1"
+            tag: bin-1.46.3
+          - version: "2"
+            tag: bin
     steps:
       - name: Checkout sources
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -22,9 +25,11 @@ jobs:
           tag: deno${{ matrix.version }}
           base: base_debian
           context: ./deno
-          build-args: DENO_VERSION=${{ matrix.version }}
+          build-args: |
+            DENO_VERSION=${{ matrix.version }}
+            DENO_TAG=${{ matrix.tag }}
           platforms: linux/amd64,linux/arm64
-          test: deno eval "console.log('Hello, world!')"
+          test: deno --version | grep -q "^deno ${{ matrix.version }}\." && deno eval "console.log('Hello, world!')"
           github-token: ${{ secrets.GITHUB_TOKEN }}
           dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub-oidc-connection-id: ${{ secrets.DOCKERHUB_OIDC_CONNECTIONID }}
