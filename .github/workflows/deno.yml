@@ -1,0 +1,30 @@
+name: Deno
+
+on:
+  workflow_call:
+
+jobs:
+  deno:
+    name: "deno${{ matrix.version }}"
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - "2"
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: ${{ github.event_name == 'pull_request' && 'Build and test image' || 'Build, test and push image' }}
+        uses: ./.github/actions/build-image
+        with:
+          tag: deno${{ matrix.version }}
+          base: base_debian
+          context: ./deno
+          build-args: DENO_VERSION=${{ matrix.version }}
+          platforms: linux/amd64,linux/arm64
+          test: deno eval "console.log('Hello, world!')"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-oidc-connection-id: ${{ secrets.DOCKERHUB_OIDC_CONNECTIONID }}
