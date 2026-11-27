@@ -1,6 +1,6 @@
 # Java images
 
-A JDK, copied from the vendor onto `base_debian`. The tag is `java<version>_<vendor>`, for example `java21_temurin`.
+A JDK, copied from the vendor onto `base_debian`. The tag is `java<version>_<vendor>`.
 
 | Tag | Built from | Image | `amd64` | `arm64` | `ppc64le` | `riscv64` |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
@@ -16,6 +16,13 @@ A JDK, copied from the vendor onto `base_debian`. The tag is `java<version>_<ven
 | `java25_graalvm-ce` | `ghcr.io/graalvm/jdk-community` | `ghcr.io/calagopus/oci-images:java25_graalvm-ce`, `calagopus/oci-images:java25_graalvm-ce` | ✅ | ✅ | ❌ | ❌ |
 | `java21_graalvm-ee` | `container-registry.oracle.com/graalvm/jdk` | `ghcr.io/calagopus/oci-images:java21_graalvm-ee`, `calagopus/oci-images:java21_graalvm-ee` | ✅ | ✅ | ❌ | ❌ |
 | `java25_graalvm-ee` | `container-registry.oracle.com/graalvm/jdk` | `ghcr.io/calagopus/oci-images:java25_graalvm-ee`, `calagopus/oci-images:java25_graalvm-ee` | ✅ | ✅ | ❌ | ❌ |
+| `java8_semeru` | `ibm-semeru-runtimes` | `ghcr.io/calagopus/oci-images:java8_semeru`, `calagopus/oci-images:java8_semeru` | ✅ | ✅ | ✅ | ❌ |
+| `java11_semeru` | `ibm-semeru-runtimes` | `ghcr.io/calagopus/oci-images:java11_semeru`, `calagopus/oci-images:java11_semeru` | ✅ | ✅ | ✅ | ❌ |
+| `java17_semeru` | `ibm-semeru-runtimes` | `ghcr.io/calagopus/oci-images:java17_semeru`, `calagopus/oci-images:java17_semeru` | ✅ | ✅ | ✅ | ❌ |
+| `java21_semeru` | `ibm-semeru-runtimes` | `ghcr.io/calagopus/oci-images:java21_semeru`, `calagopus/oci-images:java21_semeru` | ✅ | ✅ | ✅ | ❌ |
+| `java25_semeru` | `ibm-semeru-runtimes` | `ghcr.io/calagopus/oci-images:java25_semeru`, `calagopus/oci-images:java25_semeru` | ✅ | ✅ | ✅ | ❌ |
+| `java26_semeru` | `ibm-semeru-runtimes` | `ghcr.io/calagopus/oci-images:java26_semeru`, `calagopus/oci-images:java26_semeru` | ✅ | ✅ | ✅ | ❌ |
+| `java27_semeru` | `ibm-semeru-runtimes` | `ghcr.io/calagopus/oci-images:java27_semeru`, `calagopus/oci-images:java27_semeru` | ✅ | ✅ | ✅ | ❌ |
 | `java8_shenandoah` | `builds.shipilev.net` | `ghcr.io/calagopus/oci-images:java8_shenandoah`, `calagopus/oci-images:java8_shenandoah` | ✅ | ✅ | ❌ | ❌ |
 | `java11_shenandoah` | `builds.shipilev.net` | `ghcr.io/calagopus/oci-images:java11_shenandoah`, `calagopus/oci-images:java11_shenandoah` | ✅ | ✅ | ❌ | ❌ |
 | `java17_shenandoah` | `builds.shipilev.net` | `ghcr.io/calagopus/oci-images:java17_shenandoah`, `calagopus/oci-images:java17_shenandoah` | ✅ | ✅ | ✅ | ✅ |
@@ -38,15 +45,15 @@ A JDK, copied from the vendor onto `base_debian`. The tag is `java<version>_<ven
 | `java26_zulu` | `azul/zulu-openjdk` | `ghcr.io/calagopus/oci-images:java26_zulu`, `calagopus/oci-images:java26_zulu` | ✅ | ✅ | ❌ | ❌ |
 | `java27_zulu` | `azul/zulu-openjdk` | `ghcr.io/calagopus/oci-images:java27_zulu`, `calagopus/oci-images:java27_zulu` | ✅ | ✅ | ❌ | ❌ |
 
-The upstream images of Corretto, GraalVM and Zulu only exist for `amd64` and `arm64`. Temurin is built from Adoptium's default image, which has no `riscv64` build. The Shenandoah collector is not available on `ppc64le` and `riscv64` before Java 17, and the Java 8 build from Shipilev has no Shenandoah collector at all.
+Corretto, GraalVM and Zulu have no `ppc64le` and `riscv64` image, Temurin and Semeru no `riscv64` image. Shenandoah is only built for `ppc64le` and `riscv64` from Java 17 on, because the collector is not available there before, and the Java 8 build from Shipilev has no Shenandoah collector at all.
 
-Java 26 and 27 are not built for GraalVM, because GraalVM has no Java 26 or 27 image.
+GraalVM has no Java 8, 11, 26 and 27 image, and Oracle GraalVM 17 is not built, because its license does not allow redistribution. GraalVM CE 17 and 21 are no longer updated upstream and stay on 17.0.9 and 21.0.2.
 
-GraalVM CE for Java 17 and 21 is no longer updated upstream, so those images stay on 17.0.9 and 21.0.2 and get no security fixes. GraalVM CE 25 is built from the `25i-ol10` tag, because the plain `25` tag is no longer updated.
+Semeru is IBM's OpenJDK build with the OpenJ9 JVM instead of HotSpot.
 
-Java 26 is end of life: Temurin and Zulu 26 ended in September 2026, and Corretto 26 ended on 31 October 2026.
+Java 26 is end of life and gets no security fixes.
 
-The JDKs come without `jmods`, so `jlink` only works on JDKs that can link without them, such as Temurin 25. The Shenandoah JDKs also come without their debug JVMs.
+The JDKs come without `jmods`, so `jlink` only works on JDKs that can link without them, such as Temurin 25.
 
 ## Build
 

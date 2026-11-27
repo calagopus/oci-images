@@ -15,6 +15,7 @@ jobs:
           - corretto
           - graalvm-ce
           - graalvm-ee
+          - semeru
           - shenandoah
           - temurin
           - zulu
@@ -62,7 +63,7 @@ jobs:
           platforms: >-
             ${{ matrix.vendor == 'shenandoah' && matrix.version >= 17
             && 'linux/amd64,linux/arm64,linux/ppc64le,linux/riscv64'
-            || matrix.vendor == 'temurin' && 'linux/amd64,linux/arm64,linux/ppc64le'
+            || (matrix.vendor == 'semeru' || matrix.vendor == 'temurin') && 'linux/amd64,linux/arm64,linux/ppc64le'
             || 'linux/amd64,linux/arm64' }}
           test: java -version
           github-token: ${{ secrets.GITHUB_TOKEN }}
